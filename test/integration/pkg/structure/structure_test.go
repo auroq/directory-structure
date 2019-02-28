@@ -16,7 +16,7 @@ func TestGetDirectoryStructure(t *testing.T) {
 	}
 	expected := structure.Directory{
 		Path: tmpDir,
-		SubDirectories: map[string]structure.Directory{
+		SubDirectories: map[string]*structure.Directory{
 			"FolderA": {
 				"FolderA",
 				path.Join(tmpDir, "FolderA"),
@@ -41,7 +41,7 @@ func TestGetDirectoryStructure(t *testing.T) {
 	}
 
 	actual, err := structure.GetDirectoryStructure(tmpDir)
-	if !actual.Equals(expected) {
+	if !actual.Equals(&expected) {
 		t.Fatal(err)
 	}
 }

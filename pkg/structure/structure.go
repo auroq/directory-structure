@@ -66,8 +66,11 @@ func (dir *Directory) AddFile(fullPath string) (*File, error) {
 }
 
 func (dir Directory) FindDirectory(fullPath string) (foundDir *Directory, err error) {
-	path, _ := filepath.Split(fullPath)
+	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)
+	if path == dir.Path && name == dir.Name {
+		return &dir, nil
+	}
 	currentDir := filepath.Join(dir.Path, dir.Name)
 	if len(path) < len(currentDir) || path[:len(currentDir)] != currentDir {
 		return foundDir, errors.New(fmt.Sprintf("item '%s' is not found in directory '%s'", fullPath, dir.Path))
@@ -79,15 +82,28 @@ func (dir Directory) FindDirectory(fullPath string) (foundDir *Directory, err er
 	return dir.find(pathSlice)
 }
 
+func (dir Directory) FindFile(fullPath string) (foundFile *File, err error) {
+	path, name := filepath.Split(fullPath)
+	path = filepath.Clean(path)
+	fileDir, err := dir.FindDirectory(path)
+	if err != nil {
+		return foundFile, err
+	}
+
+	if file, ok := fileDir.Files[name]; ok {
+		return file, nil
+	}
+	return nil, errors.New(fmt.Sprintf("file could not be found in directory '%s'", dir.Path))
+}
+
 func (dir Directory) find(relativePath []string) (foundDir *Directory, err error) {
 	if subDir, ok := dir.SubDirectories[relativePath[0]]; ok {
-		fmt.Println("Transversing into:", relativePath[0])
 		if len(relativePath) == 1 {
 			return subDir, nil
 		}
 		return subDir.find(relativePath[1:])
 	}
-	return nil, errors.New(fmt.Sprintf("directory could not be found."+
+	return nil, errors.New(fmt.Sprintf("directory could not be found. "+
 		"Current dir: %s Looking for: %s", dir.Path, strings.Join(relativePath, string(os.PathSeparator))))
 }
 

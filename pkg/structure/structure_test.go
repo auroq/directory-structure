@@ -118,9 +118,10 @@ func TestDirectory_AddFile_ReturnsError(t *testing.T) {
 }
 
 var FindTests = []struct {
-	name           string
-	dir            Directory
-	fullPathToFind string
+	name              string
+	dir               Directory
+	fullDirPathToFind string
+	fullFilePathToFind string
 }{
 	{"DirectoryWithSubDirectory",
 		func() Directory {
@@ -130,6 +131,7 @@ var FindTests = []struct {
 			return dir
 		}(),
 		"/tmp/dir1/sub1",
+		"/tmp/dir1/sub1.txt",
 	},
 	{"DirectoryWithSubDirectoryWithSubDirectory",
 		func() Directory {
@@ -140,6 +142,7 @@ var FindTests = []struct {
 			return dir
 		}(),
 		"/tmp/dir1/sub1/subsub1",
+		"/tmp/dir1/sub1/subsub1.txt",
 	},
 	{"DirectoryWithSubDirectories",
 		func() Directory {
@@ -153,15 +156,37 @@ var FindTests = []struct {
 			return dir
 		}(),
 		"/tmp/dir1/sub1/subsub2/subsubsub",
+		"/tmp/dir1/sub1/subsub2/subsubsub.txt",
 	},
 }
 
 func TestDirectory_FindDirectory(t *testing.T) {
 	for _, tt := range FindTests {
 		t.Run(tt.name, func(t *testing.T) {
-			expectedPath, expectedName := filepath.Split(tt.fullPathToFind)
+			expectedPath, expectedName := filepath.Split(tt.fullDirPathToFind)
 			expectedPath = filepath.Clean(expectedPath)
-			found, err := tt.dir.FindDirectory(tt.fullPathToFind)
+			found, err := tt.dir.FindDirectory(tt.fullDirPathToFind)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if found.Path != expectedPath {
+				t.Fatalf("found path did not match expected. expected path: "+
+					"'%s' actual path: '%s'", expectedPath, found.Path)
+			}
+			if found.Name != expectedName {
+				t.Fatalf("found name did not match expected. expected name: "+
+					"'%s' actual name: '%s'", expectedName, found.Name)
+			}
+		})
+	}
+}
+
+func TestDirectory_FindFile(t *testing.T) {
+	for _, tt := range FindTests {
+		t.Run(tt.name, func(t *testing.T) {
+			expectedPath, expectedName := filepath.Split(tt.fullFilePathToFind)
+			expectedPath = filepath.Clean(expectedPath)
+			found, err := tt.dir.FindFile(tt.fullFilePathToFind)
 			if err != nil {
 				t.Fatal(err)
 			}
