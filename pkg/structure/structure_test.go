@@ -16,7 +16,7 @@ var DirectoryIdentities = []struct {
 		Directory{
 			Name: "/tmp/dir1",
 			Path: "dir1",
-			SubDirectories: map[string]Directory{
+			SubDirectories: map[string]*Directory{
 				"sub1": {
 					Name: "sub1",
 					Path: "/tmp/dir1/sub1",
@@ -28,11 +28,11 @@ var DirectoryIdentities = []struct {
 		Directory{
 			Name: "/tmp/dir1",
 			Path: "dir1",
-			SubDirectories: map[string]Directory{
+			SubDirectories: map[string]*Directory{
 				"sub1": {
 					Name: "sub1",
 					Path: "/tmp/dir1/sub1",
-					SubDirectories: map[string]Directory{
+					SubDirectories: map[string]*Directory{
 						"subsub1": {
 							Name: "subsub1",
 							Path: "/tmp/dir1/sub1/subsub1",
@@ -47,7 +47,7 @@ var DirectoryIdentities = []struct {
 func TestDirectory_Equals_WithIdentity(t *testing.T) {
 	for _, tt := range DirectoryIdentities {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.dir.Equals(tt.dir)
+			tt.dir.Equals(&tt.dir)
 		})
 	}
 }
@@ -57,8 +57,8 @@ var DirectoryTests = []struct {
 	dir  Directory
 }{
 	{"EmptyDirectory", Directory{Name: "dir", Path: "/tmp"}},
-	{"DirectoryWithFile", Directory{Name: "dir", Path: "/tmp", Files: map[string]File{"File1": {Name: "File1", Path: "/tmp/dir"}}}},
-	{"DirectoryWithSubDirectory", Directory{Name: "dir", Path: "/tmp", SubDirectories: map[string]Directory{"subdir1": {Name: "subdir1", Path: "/tmp/dir"}}}},
+	{"DirectoryWithFile", Directory{Name: "dir", Path: "/tmp", Files: map[string]*File{"File1": {Name: "File1", Path: "/tmp/dir"}}}},
+	{"DirectoryWithSubDirectory", Directory{Name: "dir", Path: "/tmp", SubDirectories: map[string]*Directory{"subdir1": {Name: "subdir1", Path: "/tmp/dir"}}}},
 }
 
 func TestDirectory_AddFile(t *testing.T) {
@@ -160,16 +160,17 @@ func TestDirectory_FindDirectory(t *testing.T) {
 	for _, tt := range FindTests {
 		t.Run(tt.name, func(t *testing.T) {
 			expectedPath, expectedName := filepath.Split(tt.fullPathToFind)
-			found, err := tt.dir.Find(tt.fullPathToFind)
+			expectedPath = filepath.Clean(expectedPath)
+			found, err := tt.dir.FindDirectory(tt.fullPathToFind)
 			if err != nil {
 				t.Fatal(err)
 			}
 			if found.Path != expectedPath {
-				t.Fatalf("found path did not match expected. expected path: " +
+				t.Fatalf("found path did not match expected. expected path: "+
 					"'%s' actual path: '%s'", expectedPath, found.Path)
 			}
 			if found.Name != expectedName {
-				t.Fatalf("found name did not match expected. expected name: " +
+				t.Fatalf("found name did not match expected. expected name: "+
 					"'%s' actual name: '%s'", expectedName, found.Name)
 			}
 		})
