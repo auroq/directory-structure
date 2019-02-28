@@ -8,11 +8,6 @@ import (
 	"strings"
 )
 
-type File struct {
-	Name string
-	Path string
-}
-
 type Directory struct {
 	Name           string
 	Path           string
@@ -50,22 +45,7 @@ func (dir *Directory) AddDirectory(fullPath string) (*Directory, error) {
 	return &newDirectory, nil
 }
 
-func (dir *Directory) AddFile(fullPath string) (*File, error) {
-	path, name := filepath.Split(fullPath)
-	path = filepath.Clean(path)
-	if currentDir := filepath.Join(dir.Path, dir.Name); path != currentDir {
-		return nil, errors.New(fmt.Sprintf("fullPath must be an immediate child of the directory to which it "+
-			"is being added. currentPath: '%s' fullpath: '%s'", currentDir, fullPath))
-	}
-	if dir.Files == nil {
-		dir.Files = map[string]*File{}
-	}
-	newFile := File{name, path}
-	dir.Files[name] = &newFile
-	return &newFile, nil
-}
-
-func (dir Directory) FindDirectory(fullPath string) (foundDir *Directory, err error) {
+func (dir Directory) FindDirectory(fullPath string) (*Directory, error) {
 	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)
 	if path == dir.Path && name == dir.Name {
@@ -73,7 +53,7 @@ func (dir Directory) FindDirectory(fullPath string) (foundDir *Directory, err er
 	}
 	currentDir := filepath.Join(dir.Path, dir.Name)
 	if len(path) < len(currentDir) || path[:len(currentDir)] != currentDir {
-		return foundDir, errors.New(fmt.Sprintf("item '%s' is not found in directory '%s'", fullPath, dir.Path))
+		return nil, errors.New(fmt.Sprintf("item '%s' is not found in directory '%s'", fullPath, dir.Path))
 	}
 	pathSlice := strings.Split(strings.TrimPrefix(fullPath, currentDir), string(os.PathSeparator))
 	if len(pathSlice) >= 1 && pathSlice[0] == "" {
@@ -82,21 +62,7 @@ func (dir Directory) FindDirectory(fullPath string) (foundDir *Directory, err er
 	return dir.find(pathSlice)
 }
 
-func (dir Directory) FindFile(fullPath string) (foundFile *File, err error) {
-	path, name := filepath.Split(fullPath)
-	path = filepath.Clean(path)
-	fileDir, err := dir.FindDirectory(path)
-	if err != nil {
-		return foundFile, err
-	}
-
-	if file, ok := fileDir.Files[name]; ok {
-		return file, nil
-	}
-	return nil, errors.New(fmt.Sprintf("file could not be found in directory '%s'", dir.Path))
-}
-
-func (dir Directory) find(relativePath []string) (foundDir *Directory, err error) {
+func (dir Directory) find(relativePath []string) (*Directory, error) {
 	if subDir, ok := dir.SubDirectories[relativePath[0]]; ok {
 		if len(relativePath) == 1 {
 			return subDir, nil
@@ -107,10 +73,10 @@ func (dir Directory) find(relativePath []string) (foundDir *Directory, err error
 		"Current dir: %s Looking for: %s", dir.Path, strings.Join(relativePath, string(os.PathSeparator))))
 }
 
-func GetDirectoryStructure(fullPath string) (root Directory, err error) {
+func GetDirectoryStructure(fullPath string) (*Directory, error) {
 	path, name := filepath.Split(fullPath)
-	root = Directory{Name: name, Path: path}
-	err = filepath.Walk(fullPath,
+	root := Directory{Name: name, Path: path}
+	err := filepath.Walk(fullPath,
 		func(p string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -128,5 +94,5 @@ func GetDirectoryStructure(fullPath string) (root Directory, err error) {
 			}
 			return nil
 		})
-	return
+	return &root, err
 }
