@@ -11,6 +11,10 @@ type File struct {
 	Path string
 }
 
+func (file File) Equals(other *File) bool {
+	return file.Path == other.Path && file.Name == other.Name
+}
+
 func (dir *Directory) AddFile(fullPath string) (*File, error) {
 	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)
