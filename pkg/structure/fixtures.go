@@ -1,9 +1,9 @@
 package structure
 
 var DirectoryIdentities = []struct {
-	name         string
-	dir          Directory
-	dirFullPath  string
+	name        string
+	dir         Directory
+	dirFullPath string
 }{
 	{
 		"EmptyDirectory",
@@ -43,6 +43,27 @@ var DirectoryIdentities = []struct {
 			},
 		},
 		"/tmp/dir1/sub2",
+	},
+	{"DirectoryWithSubDirectories2",
+		Directory{
+			Name: "dir1",
+			Path: "/tmp",
+			SubDirectories: map[string]*Directory{
+				"sub-1": {
+					Name: "sub-1",
+					Path: "/tmp/dir1",
+				},
+				"sub-2": {
+					Name: "sub-2",
+					Path: "/tmp/dir1",
+				},
+				"sub-3": {
+					Name: "sub-3",
+					Path: "/tmp/dir1",
+				},
+			},
+		},
+		"/tmp/dir1/sub-2",
 	},
 	{"DirectoryWithSubDirectoryWithSubDirectory",
 		Directory{

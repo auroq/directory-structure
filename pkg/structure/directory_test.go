@@ -1,6 +1,7 @@
 package structure
 
 import (
+	"fmt"
 	"path/filepath"
 	"testing"
 )
@@ -8,8 +9,26 @@ import (
 func TestDirectory_Equals_WithIdentity(t *testing.T) {
 	for _, tt := range DirectoryIdentities {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.dir.Equals(&tt.dir)
+			if !tt.dir.Equals(&tt.dir) {
+				t.Fatal("directories were equal but were not found to be")
+			}
 		})
+	}
+}
+
+func TestDirectory_Equals_WhenNotEqual(t *testing.T) {
+	for _, tt := range DirectoryIdentities {
+		for _, ott := range DirectoryIdentities {
+			if tt.name == ott.name {
+				continue
+			}
+			t.Run(fmt.Sprintf("%s_And_%s", tt.name, ott.name), func(t *testing.T) {
+				if tt.dir.Equals(&ott.dir) {
+					tt.dir.Equals(&ott.dir)
+					t.Fatal("directories were found to be equal but were not")
+				}
+			})
+		}
 	}
 }
 
