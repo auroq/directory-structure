@@ -1,7 +1,7 @@
 package structure
 
 import (
-	"github.com/auroq/symfigurator/pkg/structure"
+	"github.com/auroq/directory-structure/pkg/structure"
 	"io/ioutil"
 	"os"
 	"path"
