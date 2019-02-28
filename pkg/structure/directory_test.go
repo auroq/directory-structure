@@ -16,16 +16,49 @@ func TestDirectory_Equals_WithIdentity(t *testing.T) {
 	}
 }
 
-func TestDirectory_Equals_WhenNotEqual(t *testing.T) {
+func TestDirectory_Equals_WithDifferentInstances(t *testing.T) {
+	directory1 := Directory{Name: "dir1", Path: "/tmp"}
+	directory2 := Directory{Name: "dir1", Path: "/tmp"}
+	if directory1.Equals(&directory2) {
+		t.Fatal("directories were found to be equal but were not")
+	}
+}
+
+func TestDirectory_Equals_WhenDifferentName(t *testing.T) {
+	directory1 := Directory{Name: "dir1", Path: "/tmp"}
+	directory2 := Directory{Name: "dir2", Path: "/tmp"}
+	if directory1.Equals(&directory2) {
+		t.Fatal("directories were found to be equal but were not")
+	}
+}
+
+func TestDirectory_Equals_WhenDifferentPath(t *testing.T) {
+	directory1 := Directory{Name: "dir1", Path: "/tmp"}
+	directory2 := Directory{Name: "dir1", Path: "/tmp/dir"}
+	if directory1.Equals(&directory2) {
+		t.Fatal("directories were found to be equal but were not")
+	}
+}
+
+func TestDirectory_StructureEquals_WithIdentity(t *testing.T) {
+	for _, tt := range DirectoryIdentities {
+		t.Run(tt.name, func(t *testing.T) {
+			if !tt.dir.StructureEquals(&tt.dir) {
+				t.Fatal("directory structures were found to be unequal but were equal")
+			}
+		})
+	}
+}
+
+func TestDirectory_StructureEquals_WhenNotEqual(t *testing.T) {
 	for _, tt := range DirectoryIdentities {
 		for _, ott := range DirectoryIdentities {
 			if tt.name == ott.name {
 				continue
 			}
 			t.Run(fmt.Sprintf("%s_And_%s", tt.name, ott.name), func(t *testing.T) {
-				if tt.dir.Equals(&ott.dir) {
-					tt.dir.Equals(&ott.dir)
-					t.Fatal("directories were found to be equal but were not")
+				if tt.dir.StructureEquals(&ott.dir) {
+					t.Fatal("directory structures were found to be equal but were not")
 				}
 			})
 		}

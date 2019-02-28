@@ -16,6 +16,10 @@ type Directory struct {
 }
 
 func (dir Directory) Equals(other *Directory) bool {
+	return dir.Path == other.Path && dir.Name == other.Name
+}
+
+func (dir Directory) StructureEquals(other *Directory) bool {
 	if !(dir.Path == other.Path &&
 		dir.Name == other.Name &&
 		len(dir.SubDirectories) == len(other.SubDirectories) &&
@@ -24,7 +28,7 @@ func (dir Directory) Equals(other *Directory) bool {
 	}
 	for subDirectoryName, subDirectory := range dir.SubDirectories {
 		if otherSubDir, ok := other.SubDirectories[subDirectoryName]; ok {
-			if !otherSubDir.Equals(subDirectory) {
+			if !otherSubDir.StructureEquals(subDirectory) {
 				return false
 			}
 		} else {
