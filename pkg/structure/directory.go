@@ -71,14 +71,14 @@ func (dir *Directory) AddDirectory(fullPath string) (*Directory, error) {
 	return &newDirectory, nil
 }
 
-func (dir* Directory) relativePath(fullPath string) string {
+func (dir *Directory) relativePath(fullPath string) string {
 	currentDir := filepath.Join(dir.Path, dir.Name)
 	path := strings.TrimPrefix(fullPath, currentDir)
 	path = strings.TrimPrefix(path, "/")
 	return path
 }
 
-func (dir *Directory) createPath(pathSlice []string) (*Directory, error){
+func (dir *Directory) createPath(pathSlice []string) (*Directory, error) {
 	if len(pathSlice) <= 0 {
 		return dir, nil
 	}

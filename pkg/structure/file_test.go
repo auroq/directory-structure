@@ -5,6 +5,37 @@ import (
 	"testing"
 )
 
+func TestFile_Equals_WithIdentity(t *testing.T) {
+	file := File{Name: "file1", Path: "/tmp"}
+	if !file.Equals(&file) {
+		t.Fatal("files were equal but were not found to be")
+	}
+}
+
+func TestFile_Equals_WithDifferentInstances(t *testing.T) {
+	file1 := File{Name: "file1", Path: "/tmp"}
+	file2 := File{Name: "file1", Path: "/tmp"}
+	if !file1.Equals(&file2) {
+		t.Fatal("files were found to be equal but were not")
+	}
+}
+
+func TestFile_Equals_WhenDifferentName(t *testing.T) {
+	file1 := File{Name: "file1", Path: "/tmp"}
+	file2 := File{Name: "file2", Path: "/tmp"}
+	if file1.Equals(&file2) {
+		t.Fatal("files were found to be equal but were not")
+	}
+}
+
+func TestFile_Equals_WhenDifferentPath(t *testing.T) {
+	file1 := File{Name: "file1", Path: "/tmp"}
+	file2 := File{Name: "file1", Path: "/tmp/dir"}
+	if file1.Equals(&file2) {
+		t.Fatal("files were found to be equal but were not")
+	}
+}
+
 func TestDirectory_AddFile(t *testing.T) {
 	for _, tt := range DirectoryIdentities {
 		t.Run(tt.name, func(t *testing.T) {
@@ -25,6 +56,22 @@ func TestDirectory_AddFile(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestDirectory_AddFile_ReturnsErrorIfNotSubdirectory(t *testing.T) {
+	dir := Directory{Name: "dir", Path: "/tmp"}
+	_, err := dir.AddDirectory("/tmp/other/subdir1/subdir2/subdir3/file.txt")
+	if err == nil {
+		t.Fatal("error should have been returned but was nil")
+	}
+}
+
+func TestDirectory_AddFile_ReturnsErrorIfDifferentParent(t *testing.T) {
+	dir := Directory{Name: "dir", Path: "/tmp"}
+	_, err := dir.AddDirectory("/other/dir/subdir1/subdir2/subdir3/file.txt")
+	if err == nil {
+		t.Fatal("error should have been returned but was nil")
 	}
 }
 
@@ -57,21 +104,21 @@ func TestDirectory_AddFile_CreatesSubdirectoriesAsNecessary(t *testing.T) {
 	}
 	if subdir1, ok := dir.SubDirectories["subdir1"]; !ok {
 		t.Fatal("subdir1 was not created")
-		expected := Directory{ Name: "subdir1", Path: "/tmp/dir", }
+		expected := Directory{Name: "subdir1", Path: "/tmp/dir"}
 		if !subdir1.Equals(&expected) {
 			t.Fatal("subdir1 structure was incorrect")
 		}
 	}
 	if subdir2, ok := dir.SubDirectories["subdir1"].SubDirectories["subdir2"]; !ok {
 		t.Fatal("subdir2 was not created")
-		expected := Directory{ Name: "subdir2", Path: "/tmp/dir/subdir1", }
+		expected := Directory{Name: "subdir2", Path: "/tmp/dir/subdir1"}
 		if !subdir2.Equals(&expected) {
 			t.Fatal("subdir2 structure was incorrect")
 		}
 	}
 	if file, ok := dir.SubDirectories["subdir1"].SubDirectories["subdir2"].Files["file"]; !ok {
 		t.Fatal("file was not created")
-		expected := File{ Name: "file", Path: "/tmp/dir/subdir1/subdir2", }
+		expected := File{Name: "file", Path: "/tmp/dir/subdir1/subdir2"}
 		if !file.Equals(&expected) {
 			t.Fatal("file structure was incorrect")
 		}
