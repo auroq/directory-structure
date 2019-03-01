@@ -3,7 +3,9 @@ package structure
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
+	"strings"
 )
 
 type File struct {
@@ -18,15 +20,26 @@ func (file File) Equals(other *File) bool {
 func (dir *Directory) AddFile(fullPath string) (*File, error) {
 	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)
-	if currentDir := filepath.Join(dir.Path, dir.Name); path != currentDir {
-		return nil, errors.New(fmt.Sprintf("fullPath must be an immediate child of the directory to which it "+
-			"is being added. currentPath: '%s' fullpath: '%s'", currentDir, fullPath))
+	if !dir.IsSubPath(fullPath) {
+		return nil, errors.New("fullPath must be an immediate child of the directory to which it is being added")
 	}
-	if dir.Files == nil {
-		dir.Files = map[string]*File{}
-	}
+
+	var parent *Directory
 	newFile := File{name, path}
-	dir.Files[name] = &newFile
+	if relativePath := dir.relativePath(path); relativePath == "" {
+		parent = dir
+	} else {
+		pathSlice := strings.Split(relativePath, string(os.PathSeparator))
+		newParent, err := dir.createPath(pathSlice)
+		if err != nil {
+			return nil, err
+		}
+		parent = newParent
+	}
+	if parent.Files == nil {
+		parent.Files = map[string]*File{}
+	}
+	parent.Files[name] = &newFile
 	return &newFile, nil
 }
 

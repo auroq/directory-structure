@@ -112,7 +112,7 @@ func TestDirectory_AddDirectory_CreatesSubdirectoriesAsNecessary(t *testing.T) {
 	}
 	if subdir3, ok := dir.SubDirectories["subdir1"].SubDirectories["subdir2"].SubDirectories["subdir3"]; !ok {
 		t.Fatal("subdir1 was not created")
-		expected := Directory{ Name: "subdir3", Path: "/tmp/dir/subdir1/subidir2", }
+		expected := Directory{ Name: "subdir3", Path: "/tmp/dir/subdir1/subdir2", }
 		if !subdir3.Equals(&expected) {
 			t.Fatal("subdir1 structure was incorrect")
 		}
