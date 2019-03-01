@@ -49,7 +49,8 @@ func (dir *Directory) AddDirectory(fullPath string) (*Directory, error) {
 	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)
 	if !dir.IsSubPath(fullPath) {
-		return nil, errors.New("fullPath must be a subdirectory of the directory to which it is being added")
+		return nil, errors.New(fmt.Sprintf("fullPath must be a subdirectory of the directory to which it is " +
+			"being added: '%s' is not a subdirectory of '%s'", fullPath, filepath.Join(dir.Path, dir.Name)))
 	}
 
 	var parent *Directory
