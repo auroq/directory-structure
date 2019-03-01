@@ -19,7 +19,7 @@ func TestDirectory_Equals_WithIdentity(t *testing.T) {
 func TestDirectory_Equals_WithDifferentInstances(t *testing.T) {
 	directory1 := Directory{Name: "dir1", Path: "/tmp"}
 	directory2 := Directory{Name: "dir1", Path: "/tmp"}
-	if directory1.Equals(&directory2) {
+	if !directory1.Equals(&directory2) {
 		t.Fatal("directories were found to be equal but were not")
 	}
 }
@@ -90,17 +90,62 @@ func TestDirectory_AddDirectory(t *testing.T) {
 	}
 }
 
-func TestDirectory_AddDirectory_ReturnsError(t *testing.T) {
+func TestDirectory_AddDirectory_CreatesSubdirectoriesAsNecessary(t *testing.T) {
 	dir := Directory{Name: "dir", Path: "/tmp"}
 	_, err := dir.AddDirectory("/tmp/dir/subdir1/subdir2/subdir3")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if subdir1, ok := dir.SubDirectories["subdir1"]; !ok {
+		t.Fatal("subdir1 was not created")
+		expected := Directory{ Name: "subdir1", Path: "/tmp/dir", }
+		if !subdir1.Equals(&expected) {
+			t.Fatal("subdir1 structure was incorrect")
+		}
+	}
+	if subdir2, ok := dir.SubDirectories["subdir1"].SubDirectories["subdir2"]; !ok {
+		t.Fatal("subdir2 was not created")
+		expected := Directory{ Name: "subdir2", Path: "/tmp/dir/subdir1", }
+		if !subdir2.Equals(&expected) {
+			t.Fatal("subdir2 structure was incorrect")
+		}
+	}
+	if subdir3, ok := dir.SubDirectories["subdir1"].SubDirectories["subdir2"].SubDirectories["subdir3"]; !ok {
+		t.Fatal("subdir1 was not created")
+		expected := Directory{ Name: "subdir3", Path: "/tmp/dir/subdir1/subidir2", }
+		if !subdir3.Equals(&expected) {
+			t.Fatal("subdir1 structure was incorrect")
+		}
+	}
+}
+
+func TestDirectory_AddDirectory_ReturnsErrorIfNotSubdirectory(t *testing.T) {
+	dir := Directory{Name: "dir", Path: "/tmp"}
+	_, err := dir.AddDirectory("/tmp/other/subdir1/subdir2/subdir3")
 	if err == nil {
 		t.Fatal("error should have been returned but was nil")
 	}
 }
 
-func TestDirectory_AddFile_ReturnsError(t *testing.T) {
+func TestDirectory_AddDirectory_ReturnsErrorIfDifferentParent(t *testing.T) {
 	dir := Directory{Name: "dir", Path: "/tmp"}
-	_, err := dir.AddDirectory("/tmp/dir/subdir1/subdir2/subdir3/file.txt")
+	_, err := dir.AddDirectory("/other/dir/subdir1/subdir2/subdir3")
+	if err == nil {
+		t.Fatal("error should have been returned but was nil")
+	}
+}
+
+func TestDirectory_AddFile_ReturnsErrorIfNotSubdirectory(t *testing.T) {
+	dir := Directory{Name: "dir", Path: "/tmp"}
+	_, err := dir.AddDirectory("/tmp/other/subdir1/subdir2/subdir3/file.txt")
+	if err == nil {
+		t.Fatal("error should have been returned but was nil")
+	}
+}
+
+func TestDirectory_AddFile_ReturnsErrorIfDifferentParent(t *testing.T) {
+	dir := Directory{Name: "dir", Path: "/tmp"}
+	_, err := dir.AddDirectory("/other/dir/subdir1/subdir2/subdir3/file.txt")
 	if err == nil {
 		t.Fatal("error should have been returned but was nil")
 	}
@@ -124,5 +169,44 @@ func TestDirectory_FindDirectory(t *testing.T) {
 					"'%s' actual name: '%s'", expectedName, found.Name)
 			}
 		})
+	}
+}
+
+func TestDirectory_IsSubPath(t *testing.T) {
+	for _, tt := range DirectoryIdentities {
+		t.Run(tt.name, func(t *testing.T) {
+			if !tt.dir.IsSubPath(tt.dirFullPath) {
+				t.Fatalf("'%s' is a subdirectory but was not found to be", tt.dirFullPath)
+			}
+		})
+	}
+}
+
+func TestDirectory_IsSubPath_WhenPathIsParent(t *testing.T) {
+	dir := Directory{Name: "dir1", Path: "/tmp"}
+	if dir.IsSubPath("/tmp") {
+		t.Fatalf("'/tmp' is not a subdirectory of '/tmp/dir1' but was found to be")
+	}
+}
+
+func TestDirectory_IsSubPath_WhenPathIsSibling(t *testing.T) {
+	parent := Directory{Name: "dir1", Path: "/tmp"}
+	dir, err := parent.AddDirectory("/tmp/dir1/subdir1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = parent.AddDirectory("/tmp/dir1/subdir2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if dir.IsSubPath("/tmp/dir1/subdir2") {
+		t.Fatalf("'/tmp/dir1/subdir2' is not a subdirectory of '/tmp/dir1/subdir1' but was found to be")
+	}
+}
+
+func TestDirectory_IsSubPath_WhenPathIsUnrelated(t *testing.T) {
+	dir := Directory{Name: "dir1", Path: "/tmp/dir1"}
+	if dir.IsSubPath("/other") {
+		t.Fatalf("'/tmp' is not a subdirectory of '/tmp/dir1' but was found to be")
 	}
 }

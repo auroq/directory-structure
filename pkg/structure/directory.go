@@ -35,23 +35,61 @@ func (dir Directory) StructureEquals(other *Directory) bool {
 			return false
 		}
 	}
-
 	return true
+}
+
+func (dir *Directory) IsSubPath(fullPath string) bool {
+	fullPath = filepath.Clean(fullPath)
+	currentDir := filepath.Join(dir.Path, dir.Name)
+	relPath := strings.TrimPrefix(fullPath, currentDir)
+	return relPath != fullPath
 }
 
 func (dir *Directory) AddDirectory(fullPath string) (*Directory, error) {
 	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)
-	if currentDir := filepath.Join(dir.Path, dir.Name); path != currentDir {
-		return nil, errors.New(fmt.Sprintf("fullPath must be an immediate subdirectory of the directory to which it "+
-			"is being added. currentPath: '%s' fullpath: '%s'", currentDir, fullPath))
+	if !dir.IsSubPath(fullPath) {
+		return nil, errors.New("fullPath must be a subdirectory of the directory to which it is being added")
+	}
+
+	var parent *Directory
+	newDirectory := Directory{Name: name, Path: path}
+	if relativePath := dir.relativePath(path); relativePath == "" {
+		parent = dir
+	} else {
+		pathSlice := strings.Split(relativePath, string(os.PathSeparator))
+		newParent, err := dir.createPath(pathSlice)
+		if err != nil {
+			return nil, err
+		}
+		parent = newParent
+	}
+	if parent.SubDirectories == nil {
+		parent.SubDirectories = map[string]*Directory{}
+	}
+	parent.SubDirectories[name] = &newDirectory
+	return &newDirectory, nil
+}
+
+func (dir* Directory) relativePath(fullPath string) string {
+	currentDir := filepath.Join(dir.Path, dir.Name)
+	path := strings.TrimPrefix(fullPath, currentDir)
+	path = strings.TrimPrefix(path, "/")
+	return path
+}
+
+func (dir *Directory) createPath(pathSlice []string) (*Directory, error){
+	if len(pathSlice) <= 0 {
+		return dir, nil
 	}
 	if dir.SubDirectories == nil {
 		dir.SubDirectories = map[string]*Directory{}
 	}
-	newDirectory := Directory{Name: name, Path: path}
+	name := pathSlice[0]
+	path := filepath.Join(dir.Path, dir.Name)
+	newDirectory := Directory{Name: pathSlice[0], Path: path}
 	dir.SubDirectories[name] = &newDirectory
-	return &newDirectory, nil
+	return newDirectory.createPath(pathSlice[1:])
 }
 
 func (dir Directory) FindDirectory(fullPath string) (*Directory, error) {
