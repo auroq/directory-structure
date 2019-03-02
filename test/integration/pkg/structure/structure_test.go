@@ -1,6 +1,7 @@
 package structure
 
 import (
+	"fmt"
 	"github.com/auroq/directory-structure/pkg/structure"
 	"io/ioutil"
 	"os"
@@ -71,7 +72,7 @@ func TestGetDirectoryStructure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = os.OpenFile(filepath.Join(tmpDir, "dir2", "sub2", "file"), os.O_RDONLY|os.O_CREATE, 0666)
+	_, err = os.OpenFile(filepath.Join(tmpDir, "dir2", "sub2", "file"), os.O_RDONLY|os.O_CREATE, 0700)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,5 +80,40 @@ func TestGetDirectoryStructure(t *testing.T) {
 	actual, err := structure.GetDirectoryStructure(tmpDir)
 	if !actual.Equals(&expected) {
 		t.Fatal(err)
+	}
+}
+
+func TestGetDirectoryStructure_WhenFullPathIsNotADirectory(t *testing.T) {
+	tmpDir, err := ioutil.TempDir("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	file, err := os.OpenFile(filepath.Join(tmpDir, "file"), os.O_RDONLY|os.O_CREATE, 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = structure.GetDirectoryStructure(file.Name())
+	if err == nil {
+		t.Fatal("an error was expected but err was nil")
+	}
+	if expected := fmt.Sprintf("fullPath '%s' is not a directory", file.Name()); err.Error() != expected {
+		t.Fatalf("error message was incorrect. expected: '%s' actual: '%s'", expected, err.Error())
+	}
+}
+
+func TestGetDirectoryStructure_WhenFullPathDoesNotExist(t *testing.T) {
+	tmpDir, err := ioutil.TempDir("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	path := filepath.Join(tmpDir, "missingDir")
+	_, err = structure.GetDirectoryStructure(path)
+	if err == nil {
+		t.Fatal("an error was expected but err was nil")
+	}
+	if expected := fmt.Sprintf("fullPath '%s' does not exist", path); err.Error() != expected {
+		t.Fatalf("error message was incorrect. expected: '%s' actual: '%s'", expected, err.Error())
 	}
 }

@@ -12,9 +12,16 @@ import (
 // and builds a Directory tree containing that matches the filesystem on disk
 // It returns the root Directory whose path is fullPath and an error if one occurs
 func GetDirectoryStructure(fullPath string) (*Directory, error) {
+	d, err := os.Stat(fullPath)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("fullPath '%s' does not exist", fullPath))
+	}
+	if !d.IsDir() {
+		return nil, errors.New(fmt.Sprintf("fullPath '%s' is not a directory", fullPath))
+	}
 	path, name := filepath.Split(fullPath)
 	root := Directory{Name: name, Path: path}
-	err := filepath.Walk(fullPath,
+	err = filepath.Walk(fullPath,
 		func(p string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
