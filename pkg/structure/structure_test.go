@@ -2,11 +2,22 @@ package structure
 
 import (
 	"fmt"
+	"path/filepath"
 	"testing"
 )
 
 func TestDirectory_StructureEquals_WithIdentity(t *testing.T) {
 	for _, tt := range DirectoryIdentities {
+		t.Run(tt.name, func(t *testing.T) {
+			if !tt.dir.StructureEquals(&tt.dir) {
+				t.Fatal("directory structures were found to be unequal but were equal")
+			}
+		})
+	}
+}
+
+func TestDirectory_StructureEquals_WithIdentityAndFile(t *testing.T) {
+	for _, tt := range FindTests {
 		t.Run(tt.name, func(t *testing.T) {
 			if !tt.dir.StructureEquals(&tt.dir) {
 				t.Fatal("directory structures were found to be unequal but were equal")
@@ -22,6 +33,24 @@ func TestDirectory_StructureEquals_WhenNotEqual(t *testing.T) {
 				continue
 			}
 			t.Run(fmt.Sprintf("%s_And_%s", tt.name, ott.name), func(t *testing.T) {
+				if tt.dir.StructureEquals(&ott.dir) {
+					t.Fatal("directory structures were found to be equal but were not")
+				}
+			})
+		}
+	}
+}
+
+func TestDirectory_StructureEquals_WhenNotEqualWithFile(t *testing.T) {
+	for _, tt := range DirectoryIdentities {
+		for _, ott := range DirectoryIdentities {
+			t.Run(fmt.Sprintf("%s_And_%s", tt.name, ott.name), func(t *testing.T) {
+				if tt.name == ott.name {
+					_, err := tt.dir.AddFile(filepath.Join(tt.dir.Path, tt.dir.Name, "randomfile.txt"))
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
 				if tt.dir.StructureEquals(&ott.dir) {
 					t.Fatal("directory structures were found to be equal but were not")
 				}

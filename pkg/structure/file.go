@@ -15,7 +15,8 @@ type File struct {
 
 // Equals determines if other is equivalent to the current File.
 func (file File) Equals(other *File) bool {
-	return file.Path == other.Path && file.Name == other.Name
+	return filepath.Clean(file.Path) == filepath.Clean(other.Path) &&
+		file.Name == other.Name
 }
 
 // AddFile creates a new File and adds it to the current Directory tree

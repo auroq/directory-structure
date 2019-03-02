@@ -23,6 +23,22 @@ func TestDirectory_Equals_WithDifferentInstances(t *testing.T) {
 	}
 }
 
+func TestDirectory_EqualsWhenPathStringNotClean(t *testing.T) {
+	directory1 := Directory{Name: "directory1", Path: "/tmp/"}
+	directory2 := Directory{Name: "directory1", Path: "/tmp"}
+	if !directory1.Equals(&directory2) {
+		t.Fatal("directories were equal but were not found to be")
+	}
+}
+
+func TestDirectory_EqualsWhenPathStringNotSameCase(t *testing.T) {
+	directory1 := Directory{Name: "directory1", Path: "/tmp"}
+	directory2 := Directory{Name: "directory1", Path: "/tMp"}
+	if directory1.Equals(&directory2) {
+		t.Fatal("directories were found to be equal but were not")
+	}
+}
+
 func TestDirectory_Equals_WhenDifferentName(t *testing.T) {
 	directory1 := Directory{Name: "dir1", Path: "/tmp"}
 	directory2 := Directory{Name: "dir2", Path: "/tmp"}

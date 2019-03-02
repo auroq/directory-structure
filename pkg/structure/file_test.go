@@ -16,6 +16,22 @@ func TestFile_Equals_WithDifferentInstances(t *testing.T) {
 	file1 := File{Name: "file1", Path: "/tmp"}
 	file2 := File{Name: "file1", Path: "/tmp"}
 	if !file1.Equals(&file2) {
+		t.Fatal("files were equal but were not found to be")
+	}
+}
+
+func TestFile_EqualsWhenPathStringNotClean(t *testing.T) {
+	file1 := File{Name: "file1", Path: "/tmp/"}
+	file2 := File{Name: "file1", Path: "/tmp"}
+	if !file1.Equals(&file2) {
+		t.Fatal("files were equal but were not found to be")
+	}
+}
+
+func TestFile_EqualsWhenPathStringNotSameCase(t *testing.T) {
+	file1 := File{Name: "file1", Path: "/tmp"}
+	file2 := File{Name: "file1", Path: "/tMp"}
+	if file1.Equals(&file2) {
 		t.Fatal("files were found to be equal but were not")
 	}
 }

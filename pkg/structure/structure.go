@@ -19,20 +19,22 @@ func GetDirectoryStructure(fullPath string) (*Directory, error) {
 	if !d.IsDir() {
 		return nil, errors.New(fmt.Sprintf("fullPath '%s' is not a directory", fullPath))
 	}
-	path, name := filepath.Split(fullPath)
-	root := Directory{Name: name, Path: path}
+	rootPath, rootName := filepath.Split(fullPath)
+	rootPath = filepath.Clean(rootPath)
+	root := Directory{Name: rootName, Path: rootPath}
 	err = filepath.Walk(fullPath,
-		func(p string, info os.FileInfo, err error) error {
+		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
+			newFullPath := filepath.Join(path, info.Name())
 			if info.IsDir() {
-				_, err = root.AddDirectory(info.Name())
+				_, err = root.AddDirectory(newFullPath)
 				if err != nil {
 					return err
 				}
 			} else {
-				_, err = root.AddFile(info.Name())
+				_, err = root.AddFile(newFullPath)
 				if err != nil {
 					return err
 				}
@@ -53,12 +55,14 @@ func (dir Directory) StructureEquals(other *Directory) bool {
 		len(dir.Files) == len(other.Files)) {
 		return false
 	}
+	for fileName, file := range dir.Files {
+		if otherFile, ok := other.Files[fileName]; !ok || !otherFile.Equals(file) {
+			return false
+		}
+	}
+
 	for subDirectoryName, subDirectory := range dir.SubDirectories {
-		if otherSubDir, ok := other.SubDirectories[subDirectoryName]; ok {
-			if !otherSubDir.StructureEquals(subDirectory) {
-				return false
-			}
-		} else {
+		if otherSubDir, ok := other.SubDirectories[subDirectoryName]; !ok || !otherSubDir.StructureEquals(subDirectory) {
 			return false
 		}
 	}

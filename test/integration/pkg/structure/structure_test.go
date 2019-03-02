@@ -78,8 +78,11 @@ func TestGetDirectoryStructure(t *testing.T) {
 	}
 
 	actual, err := structure.GetDirectoryStructure(tmpDir)
-	if !actual.Equals(&expected) {
+	if err != nil {
 		t.Fatal(err)
+	}
+	if !actual.Equals(&expected) {
+		t.Fatal("directory structures did not match")
 	}
 }
 

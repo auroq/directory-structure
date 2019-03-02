@@ -19,7 +19,8 @@ type Directory struct {
 // It does so using only path and name and therefore does not take
 // into account the structure of either Directory's children.
 func (dir Directory) Equals(other *Directory) bool {
-	return dir.Path == other.Path && dir.Name == other.Name
+	return filepath.Clean(dir.Path) == filepath.Clean(other.Path) &&
+		dir.Name == other.Name
 }
 
 // AddDirectory creates a new Directory and adds it to the current Directory tree
