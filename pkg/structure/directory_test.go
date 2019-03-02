@@ -109,7 +109,7 @@ func TestDirectory_AddDirectory_ReturnsErrorIfDifferentParent(t *testing.T) {
 	}
 }
 
-func TestDirectory_FindDirectory(t *testing.T) {
+func TestDirectory_GetDirectory(t *testing.T) {
 	for _, tt := range FindTests {
 		t.Run(tt.name, func(t *testing.T) {
 			expectedPath, expectedName := filepath.Split(tt.fullDirPathToFind)
@@ -117,6 +117,27 @@ func TestDirectory_FindDirectory(t *testing.T) {
 			found, err := tt.dir.GetDirectory(tt.fullDirPathToFind)
 			if err != nil {
 				t.Fatal(err)
+			}
+			if found.Path != expectedPath {
+				t.Fatalf("found path did not match expected. expected path: "+
+					"'%s' actual path: '%s'", expectedPath, found.Path)
+			}
+			if found.Name != expectedName {
+				t.Fatalf("found name did not match expected. expected name: "+
+					"'%s' actual name: '%s'", expectedName, found.Name)
+			}
+		})
+	}
+}
+
+func TestDirectory_FindDirectoryDepth(t *testing.T) {
+	for _, tt := range FindTests {
+		t.Run(tt.name, func(t *testing.T) {
+			expectedPath, expectedName := filepath.Split(tt.fullDirPathToFind)
+			expectedPath = filepath.Clean(expectedPath)
+			found := tt.dir.FindDirectoryDepth(expectedName)
+			if found == nil {
+				t.Fatal("nil was returned but actual directory was expected")
 			}
 			if found.Path != expectedPath {
 				t.Fatalf("found path did not match expected. expected path: "+

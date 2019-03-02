@@ -56,3 +56,16 @@ func (dir Directory) GetFile(fullPath string) (*File, error) {
 	}
 	return nil, errors.New(fmt.Sprintf("file could not be found in directory '%s'", dir.Path))
 }
+
+func (dir Directory) FindFileDepth(fileName string) *File {
+	if file, ok := dir.Files[fileName]; ok {
+		return file
+	}
+	for _, subDir := range dir.SubDirectories {
+		d := subDir.FindFileDepth(fileName)
+		if d != nil {
+			return d
+		}
+	}
+	return nil
+}

@@ -72,3 +72,16 @@ func (dir Directory) GetDirectory(fullPath string) (*Directory, error) {
 	}
 	return dir.findPath(pathSlice)
 }
+
+func (dir Directory) FindDirectoryDepth(dirName string) *Directory {
+	if dir.Name == dirName {
+		return &dir
+	}
+	for _, subDir := range dir.SubDirectories {
+		d := subDir.FindDirectoryDepth(dirName)
+		if d != nil {
+			return d
+		}
+	}
+	return nil
+}
