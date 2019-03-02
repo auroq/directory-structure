@@ -43,10 +43,10 @@ func (dir *Directory) AddFile(fullPath string) (*File, error) {
 	return &newFile, nil
 }
 
-func (dir Directory) FindFile(fullPath string) (*File, error) {
+func (dir Directory) GetFile(fullPath string) (*File, error) {
 	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)
-	fileDir, err := dir.FindDirectory(path)
+	fileDir, err := dir.GetDirectory(path)
 	if err != nil {
 		return nil, err
 	}

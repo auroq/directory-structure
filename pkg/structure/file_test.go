@@ -39,7 +39,7 @@ func TestFile_Equals_WhenDifferentPath(t *testing.T) {
 func TestDirectory_AddFile(t *testing.T) {
 	for _, tt := range DirectoryIdentities {
 		t.Run(tt.name, func(t *testing.T) {
-			dir, err := tt.dir.FindDirectory(tt.dirFullPath)
+			dir, err := tt.dir.GetDirectory(tt.dirFullPath)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -80,7 +80,7 @@ func TestDirectory_FindFile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			expectedPath, expectedName := filepath.Split(tt.fullFilePathToFind)
 			expectedPath = filepath.Clean(expectedPath)
-			found, err := tt.dir.FindFile(tt.fullFilePathToFind)
+			found, err := tt.dir.GetFile(tt.fullFilePathToFind)
 			if err != nil {
 				t.Fatal(err)
 			}

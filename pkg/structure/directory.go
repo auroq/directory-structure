@@ -15,36 +15,18 @@ type Directory struct {
 	Files          map[string]*File
 }
 
+// Equals determines if other is equivalent to the current Directory.
+// It does so using only path and name and therefore does not take
+// into account the structure of either Directory's children.
 func (dir Directory) Equals(other *Directory) bool {
 	return dir.Path == other.Path && dir.Name == other.Name
 }
 
-func (dir Directory) StructureEquals(other *Directory) bool {
-	if !(dir.Path == other.Path &&
-		dir.Name == other.Name &&
-		len(dir.SubDirectories) == len(other.SubDirectories) &&
-		len(dir.Files) == len(other.Files)) {
-		return false
-	}
-	for subDirectoryName, subDirectory := range dir.SubDirectories {
-		if otherSubDir, ok := other.SubDirectories[subDirectoryName]; ok {
-			if !otherSubDir.StructureEquals(subDirectory) {
-				return false
-			}
-		} else {
-			return false
-		}
-	}
-	return true
-}
-
-func (dir *Directory) IsSubPath(fullPath string) bool {
-	fullPath = filepath.Clean(fullPath)
-	currentDir := filepath.Join(dir.Path, dir.Name)
-	relPath := strings.TrimPrefix(fullPath, currentDir)
-	return relPath != fullPath
-}
-
+// AddDirectory creates a new directory and adds it to the current directory tree
+// The new directory will contain a name and a path specified by fullPath.
+// SubDirectories and Files of the new directory will be nil
+// AddDirectory will return the new Directory and an error if fullPath is not a
+// subdirectory of the current Directory
 func (dir *Directory) AddDirectory(fullPath string) (*Directory, error) {
 	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)
@@ -71,29 +53,10 @@ func (dir *Directory) AddDirectory(fullPath string) (*Directory, error) {
 	parent.SubDirectories[name] = &newDirectory
 	return &newDirectory, nil
 }
-
-func (dir *Directory) relativePath(fullPath string) string {
-	currentDir := filepath.Join(dir.Path, dir.Name)
-	path := strings.TrimPrefix(fullPath, currentDir)
-	path = strings.TrimPrefix(path, "/")
-	return path
-}
-
-func (dir *Directory) createPath(pathSlice []string) (*Directory, error) {
-	if len(pathSlice) <= 0 {
-		return dir, nil
-	}
-	if dir.SubDirectories == nil {
-		dir.SubDirectories = map[string]*Directory{}
-	}
-	name := pathSlice[0]
-	path := filepath.Join(dir.Path, dir.Name)
-	newDirectory := Directory{Name: pathSlice[0], Path: path}
-	dir.SubDirectories[name] = &newDirectory
-	return newDirectory.createPath(pathSlice[1:])
-}
-
-func (dir Directory) FindDirectory(fullPath string) (*Directory, error) {
+// GetDirectory transverses the curent Directory to find a directory whose
+// path is fullPath. It returns the Directory and an error if fullPath is
+// not a subdirectory of the current Directory.
+func (dir Directory) GetDirectory(fullPath string) (*Directory, error) {
 	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)
 	if path == dir.Path && name == dir.Name {
@@ -107,40 +70,5 @@ func (dir Directory) FindDirectory(fullPath string) (*Directory, error) {
 	if len(pathSlice) >= 1 && pathSlice[0] == "" {
 		pathSlice = pathSlice[1:]
 	}
-	return dir.find(pathSlice)
-}
-
-func (dir Directory) find(relativePath []string) (*Directory, error) {
-	if subDir, ok := dir.SubDirectories[relativePath[0]]; ok {
-		if len(relativePath) == 1 {
-			return subDir, nil
-		}
-		return subDir.find(relativePath[1:])
-	}
-	return nil, errors.New(fmt.Sprintf("directory could not be found. "+
-		"Current dir: %s Looking for: %s", dir.Path, strings.Join(relativePath, string(os.PathSeparator))))
-}
-
-func GetDirectoryStructure(fullPath string) (*Directory, error) {
-	path, name := filepath.Split(fullPath)
-	root := Directory{Name: name, Path: path}
-	err := filepath.Walk(fullPath,
-		func(p string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if info.IsDir() {
-				_, err = root.AddDirectory(info.Name())
-				if err != nil {
-					return err
-				}
-			} else {
-				_, err = root.AddFile(info.Name())
-				if err != nil {
-					return err
-				}
-			}
-			return nil
-		})
-	return &root, err
+	return dir.findPath(pathSlice)
 }
