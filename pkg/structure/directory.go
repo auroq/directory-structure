@@ -53,7 +53,7 @@ func (dir *Directory) AddDirectory(fullPath string) (*Directory, error) {
 	parent.SubDirectories[name] = &newDirectory
 	return &newDirectory, nil
 }
-// GetDirectory transverses the curent Directory to find a directory whose
+// GetDirectory transverses the current Directory to find a directory whose
 // path is fullPath. It returns the Directory and an error if fullPath is
 // not a subdirectory of the current Directory.
 func (dir Directory) GetDirectory(fullPath string) (*Directory, error) {
@@ -73,6 +73,9 @@ func (dir Directory) GetDirectory(fullPath string) (*Directory, error) {
 	return dir.findPath(pathSlice)
 }
 
+// FindDirectoryDepth searches the directory tree for a Directory using depth first search.
+// When it finds a Directory with name dirName, it returns it.
+// If the Directory is not found, nil is returned
 func (dir Directory) FindDirectoryDepth(dirName string) *Directory {
 	if dir.Name == dirName {
 		return &dir

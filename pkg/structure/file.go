@@ -57,6 +57,9 @@ func (dir Directory) GetFile(fullPath string) (*File, error) {
 	return nil, errors.New(fmt.Sprintf("file could not be found in directory '%s'", dir.Path))
 }
 
+// FindFileDepth searches the directory tree for a File using depth first search.
+// When it finds a File with name filenName, it returns it.
+// If the File is not found, nil is returned
 func (dir Directory) FindFileDepth(fileName string) *File {
 	if file, ok := dir.Files[fileName]; ok {
 		return file
