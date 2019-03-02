@@ -22,11 +22,11 @@ func (dir Directory) Equals(other *Directory) bool {
 	return dir.Path == other.Path && dir.Name == other.Name
 }
 
-// AddDirectory creates a new directory and adds it to the current directory tree
-// The new directory will contain a name and a path specified by fullPath.
-// SubDirectories and Files of the new directory will be nil
+// AddDirectory creates a new Directory and adds it to the current Directory tree
+// The new Directory will contain a name and a path specified by fullPath.
+// SubDirectories and Files of the new Directory will be nil
 // AddDirectory will return the new Directory and an error if fullPath is not a
-// subdirectory of the current Directory
+// descendant of the current Directory
 func (dir *Directory) AddDirectory(fullPath string) (*Directory, error) {
 	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)
@@ -53,9 +53,10 @@ func (dir *Directory) AddDirectory(fullPath string) (*Directory, error) {
 	parent.SubDirectories[name] = &newDirectory
 	return &newDirectory, nil
 }
+
 // GetDirectory transverses the current Directory to find a directory whose
 // path is fullPath. It returns the Directory and an error if fullPath is
-// not a subdirectory of the current Directory.
+// not a descendant of the current Directory.
 func (dir Directory) GetDirectory(fullPath string) (*Directory, error) {
 	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)

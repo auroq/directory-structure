@@ -13,10 +13,15 @@ type File struct {
 	Path string
 }
 
+// Equals determines if other is equivalent to the current File.
 func (file File) Equals(other *File) bool {
 	return file.Path == other.Path && file.Name == other.Name
 }
 
+// AddFile creates a new File and adds it to the current Directory tree
+// The new File will contain a name and a path specified by fullPath.
+// AddDirectory will return the new File and an error if fullPath is not a
+// descendant of the current Directory
 func (dir *Directory) AddFile(fullPath string) (*File, error) {
 	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)
@@ -43,6 +48,9 @@ func (dir *Directory) AddFile(fullPath string) (*File, error) {
 	return &newFile, nil
 }
 
+// GetFile transverses the current Directory to find a File whose
+// path is fullPath. It returns the File and an error if fullPath is
+// not a descendant of the current Directory.
 func (dir Directory) GetFile(fullPath string) (*File, error) {
 	path, name := filepath.Split(fullPath)
 	path = filepath.Clean(path)
@@ -58,7 +66,7 @@ func (dir Directory) GetFile(fullPath string) (*File, error) {
 }
 
 // FindFileDepth searches the directory tree for a File using depth first search.
-// When it finds a File with name filenName, it returns it.
+// When it finds a File with name fileName, it returns it.
 // If the File is not found, nil is returned
 func (dir Directory) FindFileDepth(fileName string) *File {
 	if file, ok := dir.Files[fileName]; ok {
