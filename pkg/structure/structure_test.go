@@ -46,7 +46,7 @@ func TestDirectory_StructureEquals_WhenNotEqualWithFile(t *testing.T) {
 		for _, ott := range DirectoryIdentities {
 			t.Run(fmt.Sprintf("%s_And_%s", tt.name, ott.name), func(t *testing.T) {
 				if tt.name == ott.name {
-					_, err := tt.dir.AddFile(filepath.Join(tt.dir.Path, tt.dir.Name, "randomfile.txt"))
+					_, err := tt.dir.AddFile(filepath.Join(tt.dir.Path(), tt.dir.Name(), "randomfile.txt"))
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -70,14 +70,14 @@ func TestDirectory_IsSubPath(t *testing.T) {
 }
 
 func TestDirectory_IsSubPath_WhenPathIsParent(t *testing.T) {
-	dir := Directory{Name: "dir1", Path: "/tmp"}
+	dir := Directory{name: "dir1", path: "/tmp"}
 	if dir.IsSubPath("/tmp") {
 		t.Fatalf("'/tmp' is not a subdirectory of '/tmp/dir1' but was found to be")
 	}
 }
 
 func TestDirectory_IsSubPath_WhenPathIsSibling(t *testing.T) {
-	parent := Directory{Name: "dir1", Path: "/tmp"}
+	parent := Directory{name: "dir1", path: "/tmp"}
 	dir, err := parent.AddDirectory("/tmp/dir1/subdir1")
 	if err != nil {
 		t.Fatal(err)
@@ -92,7 +92,7 @@ func TestDirectory_IsSubPath_WhenPathIsSibling(t *testing.T) {
 }
 
 func TestDirectory_IsSubPath_WhenPathIsUnrelated(t *testing.T) {
-	dir := Directory{Name: "dir1", Path: "/tmp/dir1"}
+	dir := Directory{name: "dir1", path: "/tmp/dir1"}
 	if dir.IsSubPath("/other") {
 		t.Fatalf("'/tmp' is not a subdirectory of '/tmp/dir1' but was found to be")
 	}

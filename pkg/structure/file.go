@@ -9,14 +9,30 @@ import (
 )
 
 type File struct {
-	Name string
-	Path string
+	name string
+	path string
 }
+
+// Name returns the name of the File
+func (file File) Name() string { return file.name }
+
+// Path returns the path to the File excluding the File itself
+func (file File) Path() string { return filepath.Clean(file.path) }
+
+// FullPath returns the full path to the File including the File itself
+func (file File) FullPath() string { return filepath.Clean(filepath.Join(file.path, file.name)) }
 
 // Equals determines if other is equivalent to the current File.
 func (file File) Equals(other *File) bool {
-	return filepath.Clean(file.Path) == filepath.Clean(other.Path) &&
-		file.Name == other.Name
+	return filepath.Clean(file.path) == filepath.Clean(other.path) &&
+		file.name == other.name
+}
+
+// NewFile creates a new File using a name and a path
+// Name is the name of of the File itself.
+// Path is the path to the File not including name
+func NewFile(name string, path string) File {
+	return File{name: name, path: path}
 }
 
 // AddFile creates a new File and adds it to the current Directory tree
@@ -31,7 +47,7 @@ func (dir *Directory) AddFile(fullPath string) (*File, error) {
 	}
 
 	var parent *Directory
-	newFile := File{name, path}
+	newFile := NewFile(name, path)
 	if relativePath := dir.relativePath(path); relativePath == "" {
 		parent = dir
 	} else {
@@ -42,10 +58,10 @@ func (dir *Directory) AddFile(fullPath string) (*File, error) {
 		}
 		parent = newParent
 	}
-	if parent.Files == nil {
-		parent.Files = map[string]*File{}
+	if parent.files == nil {
+		parent.files = map[string]*File{}
 	}
-	parent.Files[name] = &newFile
+	parent.files[name] = &newFile
 	return &newFile, nil
 }
 
@@ -60,20 +76,20 @@ func (dir Directory) GetFile(fullPath string) (*File, error) {
 		return nil, err
 	}
 
-	if file, ok := fileDir.Files[name]; ok {
+	if file := fileDir.File(name); file != nil {
 		return file, nil
 	}
-	return nil, errors.New(fmt.Sprintf("file could not be found in directory '%s'", dir.Path))
+	return nil, errors.New(fmt.Sprintf("file could not be found in directory '%s'", dir.Path()))
 }
 
 // FindFileDepth searches the directory tree for a File using depth first search.
 // When it finds a File with name fileName, it returns it.
 // If the File is not found, nil is returned
 func (dir Directory) FindFileDepth(fileName string) *File {
-	if file, ok := dir.Files[fileName]; ok {
+	if file := dir.File(fileName); file != nil {
 		return file
 	}
-	for _, subDir := range dir.SubDirectories {
+	for _, subDir := range dir.SubDirectories() {
 		d := subDir.FindFileDepth(fileName)
 		if d != nil {
 			return d

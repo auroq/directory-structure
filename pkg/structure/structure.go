@@ -21,7 +21,7 @@ func GetDirectoryStructure(fullPath string) (*Directory, error) {
 	}
 	rootPath, rootName := filepath.Split(fullPath)
 	rootPath = filepath.Clean(rootPath)
-	root := Directory{Name: rootName, Path: rootPath}
+	root := Directory{name: rootName, path: rootPath}
 	err = filepath.Walk(fullPath,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -49,20 +49,20 @@ func GetDirectoryStructure(fullPath string) (*Directory, error) {
 // the full structure of both Directories including SubDirectories
 // and Files.
 func (dir Directory) StructureEquals(other *Directory) bool {
-	if !(dir.Path == other.Path &&
-		dir.Name == other.Name &&
-		len(dir.SubDirectories) == len(other.SubDirectories) &&
-		len(dir.Files) == len(other.Files)) {
+	if !(dir.path == other.path &&
+		dir.name == other.name &&
+		len(dir.subDirectories) == len(other.subDirectories) &&
+		len(dir.files) == len(other.files)) {
 		return false
 	}
-	for fileName, file := range dir.Files {
-		if otherFile, ok := other.Files[fileName]; !ok || !otherFile.Equals(file) {
+	for fileName, file := range dir.files {
+		if otherFile, ok := other.files[fileName]; !ok || !otherFile.Equals(file) {
 			return false
 		}
 	}
 
-	for subDirectoryName, subDirectory := range dir.SubDirectories {
-		if otherSubDir, ok := other.SubDirectories[subDirectoryName]; !ok || !otherSubDir.StructureEquals(subDirectory) {
+	for subDirectoryName, subDirectory := range dir.subDirectories {
+		if otherSubDir, ok := other.subDirectories[subDirectoryName]; !ok || !otherSubDir.StructureEquals(subDirectory) {
 			return false
 		}
 	}
@@ -74,13 +74,13 @@ func (dir Directory) StructureEquals(other *Directory) bool {
 // to be a descendant. It returns true or false accordingly.
 func (dir *Directory) IsSubPath(fullPath string) bool {
 	fullPath = filepath.Clean(fullPath)
-	currentDir := filepath.Join(dir.Path, dir.Name)
+	currentDir := filepath.Join(dir.Path(), dir.Name())
 	relPath := strings.TrimPrefix(fullPath, currentDir)
 	return relPath != fullPath
 }
 
 func (dir *Directory) relativePath(fullPath string) string {
-	currentDir := filepath.Join(dir.Path, dir.Name)
+	currentDir := filepath.Join(dir.Path(), dir.Name())
 	path := strings.TrimPrefix(fullPath, currentDir)
 	path = strings.TrimPrefix(path, "/")
 	return path
@@ -90,23 +90,23 @@ func (dir *Directory) createPath(pathSlice []string) (*Directory, error) {
 	if len(pathSlice) <= 0 {
 		return dir, nil
 	}
-	if dir.SubDirectories == nil {
-		dir.SubDirectories = map[string]*Directory{}
+	if dir.subDirectories == nil {
+		dir.subDirectories = map[string]*Directory{}
 	}
 	name := pathSlice[0]
-	path := filepath.Join(dir.Path, dir.Name)
-	newDirectory := Directory{Name: pathSlice[0], Path: path}
-	dir.SubDirectories[name] = &newDirectory
+	path := filepath.Join(dir.Path(), dir.Name())
+	newDirectory := Directory{name: pathSlice[0], path: path}
+	dir.subDirectories[name] = &newDirectory
 	return newDirectory.createPath(pathSlice[1:])
 }
 
 func (dir Directory) findPath(relativePath []string) (*Directory, error) {
-	if subDir, ok := dir.SubDirectories[relativePath[0]]; ok {
+	if subDir := dir.SubDirectory(relativePath[0]); subDir != nil {
 		if len(relativePath) == 1 {
 			return subDir, nil
 		}
 		return subDir.findPath(relativePath[1:])
 	}
 	return nil, errors.New(fmt.Sprintf("directory could not be found. "+
-		"Current dir: %s Looking for: %s", dir.Path, strings.Join(relativePath, string(os.PathSeparator))))
+		"Current dir: %s Looking for: %s", dir.Path(), strings.Join(relativePath, string(os.PathSeparator))))
 }

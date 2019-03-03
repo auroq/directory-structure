@@ -15,7 +15,7 @@ func TestGetDirectoryStructure(t *testing.T) {
 		t.Fatal(err)
 	}
 	path, name := filepath.Split(tmpDir)
-	expected := structure.Directory{Path: path, Name: name}
+	expected := structure.NewDirectory(name, path)
 	_, err = expected.AddDirectory(filepath.Join(tmpDir, "dir1"))
 	if err != nil {
 		t.Fatal(err)

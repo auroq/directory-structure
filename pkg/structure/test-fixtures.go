@@ -7,17 +7,17 @@ var DirectoryIdentities = []struct {
 }{
 	{
 		"EmptyDirectory",
-		Directory{Name: "dir1", Path: "/tmp"},
+		Directory{name: "dir1", path: "/tmp"},
 		"/tmp/dir1",
 	},
 	{"DirectoryWithSubDirectory",
 		Directory{
-			Name: "dir1",
-			Path: "/tmp",
-			SubDirectories: map[string]*Directory{
+			name: "dir1",
+			path: "/tmp",
+			subDirectories: map[string]*Directory{
 				"sub1": {
-					Name: "sub1",
-					Path: "/tmp/dir1",
+					name: "sub1",
+					path: "/tmp/dir1",
 				},
 			},
 		},
@@ -25,20 +25,20 @@ var DirectoryIdentities = []struct {
 	},
 	{"DirectoryWithSubDirectories",
 		Directory{
-			Name: "dir1",
-			Path: "/tmp",
-			SubDirectories: map[string]*Directory{
+			name: "dir1",
+			path: "/tmp",
+			subDirectories: map[string]*Directory{
 				"sub1": {
-					Name: "sub1",
-					Path: "/tmp/dir1",
+					name: "sub1",
+					path: "/tmp/dir1",
 				},
 				"sub2": {
-					Name: "sub2",
-					Path: "/tmp/dir1",
+					name: "sub2",
+					path: "/tmp/dir1",
 				},
 				"sub3": {
-					Name: "sub3",
-					Path: "/tmp/dir1",
+					name: "sub3",
+					path: "/tmp/dir1",
 				},
 			},
 		},
@@ -46,20 +46,20 @@ var DirectoryIdentities = []struct {
 	},
 	{"DirectoryWithSubDirectories2",
 		Directory{
-			Name: "dir1",
-			Path: "/tmp",
-			SubDirectories: map[string]*Directory{
+			name: "dir1",
+			path: "/tmp",
+			subDirectories: map[string]*Directory{
 				"sub-1": {
-					Name: "sub-1",
-					Path: "/tmp/dir1",
+					name: "sub-1",
+					path: "/tmp/dir1",
 				},
 				"sub-2": {
-					Name: "sub-2",
-					Path: "/tmp/dir1",
+					name: "sub-2",
+					path: "/tmp/dir1",
 				},
 				"sub-3": {
-					Name: "sub-3",
-					Path: "/tmp/dir1",
+					name: "sub-3",
+					path: "/tmp/dir1",
 				},
 			},
 		},
@@ -67,26 +67,26 @@ var DirectoryIdentities = []struct {
 	},
 	{"DirectoryWithSubDirectoryWithSubDirectory",
 		Directory{
-			Name: "dir1",
-			Path: "/tmp",
-			SubDirectories: map[string]*Directory{
+			name: "dir1",
+			path: "/tmp",
+			subDirectories: map[string]*Directory{
 				"sub1": {
-					Name: "sub1",
-					Path: "/tmp/dir1",
+					name: "sub1",
+					path: "/tmp/dir1",
 				},
 				"sub2": {
-					Name: "sub2",
-					Path: "/tmp/dir1",
-					SubDirectories: map[string]*Directory{
+					name: "sub2",
+					path: "/tmp/dir1",
+					subDirectories: map[string]*Directory{
 						"subsub1": {
-							Name: "subsub1",
-							Path: "/tmp/dir1/sub2",
+							name: "subsub1",
+							path: "/tmp/dir1/sub2",
 						},
 					},
 				},
 				"sub3": {
-					Name: "sub3",
-					Path: "/tmp/dir1",
+					name: "sub3",
+					path: "/tmp/dir1",
 				},
 			},
 		},
@@ -94,34 +94,34 @@ var DirectoryIdentities = []struct {
 	},
 	{"DirectoryWithSubDirectoryWithSubDirectories",
 		Directory{
-			Name: "dir1",
-			Path: "/tmp",
-			SubDirectories: map[string]*Directory{
+			name: "dir1",
+			path: "/tmp",
+			subDirectories: map[string]*Directory{
 				"sub1": {
-					Name: "sub1",
-					Path: "/tmp/dir1",
+					name: "sub1",
+					path: "/tmp/dir1",
 				},
 				"sub2": {
-					Name: "sub2",
-					Path: "/tmp/dir1",
-					SubDirectories: map[string]*Directory{
+					name: "sub2",
+					path: "/tmp/dir1",
+					subDirectories: map[string]*Directory{
 						"subsub1": {
-							Name: "subsub1",
-							Path: "/tmp/dir1/sub2",
+							name: "subsub1",
+							path: "/tmp/dir1/sub2",
 						},
 						"subsub2": {
-							Name: "subsub2",
-							Path: "/tmp/dir1/sub2",
+							name: "subsub2",
+							path: "/tmp/dir1/sub2",
 						},
 						"subsub3": {
-							Name: "subsub3",
-							Path: "/tmp/dir1/sub2",
+							name: "subsub3",
+							path: "/tmp/dir1/sub2",
 						},
 					},
 				},
 				"sub3": {
-					Name: "sub3",
-					Path: "/tmp/dir1",
+					name: "sub3",
+					path: "/tmp/dir1",
 				},
 			},
 		},
@@ -137,7 +137,7 @@ var FindTests = []struct {
 }{
 	{"DirectoryWithSubDirectory",
 		func() Directory {
-			dir := Directory{Name: "dir1", Path: "/tmp"}
+			dir := NewDirectory("dir1", "/tmp")
 			_, _ = dir.AddDirectory("/tmp/dir1/sub1")
 			_, _ = dir.AddFile("/tmp/dir1/sub1.txt")
 			return dir
@@ -147,7 +147,7 @@ var FindTests = []struct {
 	},
 	{"DirectoryWithSubDirectoryWithSubDirectory",
 		func() Directory {
-			dir := Directory{Name: "dir1", Path: "/tmp"}
+			dir := NewDirectory("dir1", "/tmp")
 			sub1, _ := dir.AddDirectory("/tmp/dir1/sub1")
 			_, _ = sub1.AddDirectory("/tmp/dir1/sub1/subsub1")
 			_, _ = sub1.AddFile("/tmp/dir1/sub1/subsub1.txt")
@@ -158,7 +158,7 @@ var FindTests = []struct {
 	},
 	{"DirectoryWithSubDirectories",
 		func() Directory {
-			dir := Directory{Name: "dir1", Path: "/tmp"}
+			dir := NewDirectory("dir1", "/tmp")
 			sub1, _ := dir.AddDirectory("/tmp/dir1/sub1")
 			_, _ = sub1.AddDirectory("/tmp/dir1/sub1/subsub1")
 			subsub2, _ := sub1.AddDirectory("/tmp/dir1/sub1/subsub2")
@@ -169,5 +169,65 @@ var FindTests = []struct {
 		}(),
 		"/tmp/dir1/sub1/subsub2/subsubsub",
 		"/tmp/dir1/sub1/subsub2/subsubsub.txt",
+	},
+}
+
+var cleanTests = []struct {
+	name string
+	path string
+	cleanPath string
+} {
+	{
+		"trailingSlash",
+		"/tmp/",
+		"/tmp",
+	},
+	{
+		"extraCenterSlash",
+		"/tmp//dir",
+		"/tmp/dir",
+	},
+	{
+		"extraLeadingSlash",
+		"//tmp/dir",
+		"/tmp/dir",
+	},
+}
+
+var fullPathTests = []struct {
+	testName string
+	name string
+	path string
+	fullPath string
+} {
+	{
+		"pathIsRoot",
+		"item",
+		"/",
+		"/item",
+	},
+	{
+		"fullPathIsRoot",
+		"/",
+		"",
+		"/",
+	},
+	{
+		"trailingSlashInPath",
+		"item",
+		"/tmp/",
+		"/tmp/item",
+	},
+	{
+		"extraCenterSlashInPath",
+		"item",
+		"/tmp//dir",
+		"/tmp/dir/item",
+	},
+	{
+		"extraLeadingSlashInPath",
+		"item",
+		"//tmp/dir",
+		"/tmp/dir/item",
 	},
 }
