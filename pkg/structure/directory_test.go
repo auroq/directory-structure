@@ -1,6 +1,7 @@
 package structure
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -28,8 +29,8 @@ func TestDirectory_FullPath(t *testing.T) {
 }
 
 func TestDirectory_SubDirectory_ReturnsSubDir(t *testing.T) {
-	dir := NewDirectory("dir1", "/tmp")
-	sub1, err := dir.AddDirectory("/tmp/dir1/sub1")
+	dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
+	sub1, err := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,15 +40,15 @@ func TestDirectory_SubDirectory_ReturnsSubDir(t *testing.T) {
 }
 
 func TestDirectory_SubDirectory_NilWhenSubDirectoriesNil(t *testing.T) {
-	dir := NewDirectory("dir1", "/tmp")
+	dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 	if subDir := dir.SubDirectory("nonexistent"); subDir != nil {
 		t.Fatal("directory did not exist and should have been nil")
 	}
 }
 
 func TestDirectory_SubDirectory_NilWhenNotFound(t *testing.T) {
-	dir := NewDirectory("dir1", "/tmp")
-	_, err := dir.AddDirectory("/tmp/dir1/sub1")
+	dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
+	_, err := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,40 +68,40 @@ func TestDirectory_Equals_TrueWithIdentity(t *testing.T) {
 }
 
 func TestDirectory_Equals_TrueWithDifferentInstances(t *testing.T) {
-	directory1 := NewDirectory("dir1", "/tmp")
-	directory2 := NewDirectory("dir1", "/tmp")
+	directory1 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
+	directory2 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 	if !directory1.Equals(&directory2) {
 		t.Fatal("directories were found to be equal but were not")
 	}
 }
 
 func TestDirectory_Equals_TrueWhenPathStringNotClean(t *testing.T) {
-	directory1 := NewDirectory("dir1", "/tmp/")
-	directory2 := NewDirectory("dir1", "/tmp")
+	directory1 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp") + string(os.PathSeparator))
+	directory2 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 	if !directory1.Equals(&directory2) {
 		t.Fatal("directories were equal but were not found to be")
 	}
 }
 
 func TestDirectory_Equals_FalseWhenPathStringNotSameCase(t *testing.T) {
-	directory1 := NewDirectory("dir1", "/tmp/")
-	directory2 := NewDirectory("dir1", "/tMp")
+	directory1 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
+	directory2 := NewDirectory("dir1", filepath.Join(osRoot(), "tMp"))
 	if directory1.Equals(&directory2) {
 		t.Fatal("directories were found to be equal but were not")
 	}
 }
 
 func TestDirectory_Equals_FalseWhenDifferentName(t *testing.T) {
-	directory1 := NewDirectory("dir1", "/tmp")
-	directory2 := NewDirectory("dir2", "/tmp")
+	directory1 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
+	directory2 := NewDirectory("dir2", filepath.Join(osRoot(), "tmp"))
 	if directory1.Equals(&directory2) {
 		t.Fatal("directories were found to be equal but were not")
 	}
 }
 
 func TestDirectory_Equals_FalseWhenDifferentPath(t *testing.T) {
-	directory1 := NewDirectory("dir1", "/tmp")
-	directory2 := NewDirectory("dir1", "/tmp/dir")
+	directory1 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
+	directory2 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp", "dir"))
 	if directory1.Equals(&directory2) {
 		t.Fatal("directories were found to be equal but were not")
 	}
@@ -132,28 +133,28 @@ func TestDirectory_AddDirectory(t *testing.T) {
 }
 
 func TestDirectory_AddDirectory_CreatesSubdirectoriesAsNecessary(t *testing.T) {
-	dir := NewDirectory("dir", "/tmp")
-	_, err := dir.AddDirectory("/tmp/dir/subdir1/subdir2/subdir3")
+	dir := NewDirectory("dir", filepath.Join(osRoot(), "tmp"))
+	_, err := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir", "subdir1", "subdir2", "subdir3"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if subdir1, ok := dir.SubDirectories()["subdir1"]; !ok {
 		t.Fatal("subdir1 was not created")
-		expected := Directory{name: "subdir1", path: "/tmp/dir"}
+		expected := Directory{name: "subdir1", path: filepath.Join(osRoot(), "tmp", "dir")}
 		if !subdir1.Equals(&expected) {
 			t.Fatal("subdir1 structure was incorrect")
 		}
 	}
 	if subdir2, ok := dir.SubDirectories()["subdir1"].SubDirectories()["subdir2"]; !ok {
 		t.Fatal("subdir2 was not created")
-		expected := Directory{name: "subdir2", path: "/tmp/dir/subdir1"}
+		expected := Directory{name: "subdir2", path: filepath.Join(osRoot(), "tmp", "dir", "subdir1")}
 		if !subdir2.Equals(&expected) {
 			t.Fatal("subdir2 structure was incorrect")
 		}
 	}
 	if subdir3, ok := dir.SubDirectories()["subdir1"].SubDirectories()["subdir2"].SubDirectories()["subdir3"]; !ok {
 		t.Fatal("subdir1 was not created")
-		expected := Directory{name: "subdir3", path: "/tmp/dir/subdir1/subdir2"}
+		expected := Directory{name: "subdir3", path: filepath.Join(osRoot(), "tmp", "dir", "subdir1", "subdir2")}
 		if !subdir3.Equals(&expected) {
 			t.Fatal("subdir1 structure was incorrect")
 		}
@@ -161,16 +162,16 @@ func TestDirectory_AddDirectory_CreatesSubdirectoriesAsNecessary(t *testing.T) {
 }
 
 func TestDirectory_AddDirectory_ReturnsErrorIfNotSubdirectory(t *testing.T) {
-	dir := NewDirectory("dir", "/tmp")
-	_, err := dir.AddDirectory("/tmp/other/subdir1/subdir2/subdir3")
+	dir := NewDirectory("dir", filepath.Join(osRoot(), "tmp"))
+	_, err := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "other", "subdir1", "subdir2", "subdir3"))
 	if err == nil {
 		t.Fatal("error should have been returned but was nil")
 	}
 }
 
 func TestDirectory_AddDirectory_ReturnsErrorIfDifferentParent(t *testing.T) {
-	dir := NewDirectory("dir", "/tmp")
-	_, err := dir.AddDirectory("/other/dir/subdir1/subdir2/subdir3")
+	dir := NewDirectory("dir", filepath.Join(osRoot(), "tmp"))
+	_, err := dir.AddDirectory(filepath.Join(osRoot(), "other", "dir", "subdir1", "subdir2", "subdir3"))
 	if err == nil {
 		t.Fatal("error should have been returned but was nil")
 	}

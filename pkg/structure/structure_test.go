@@ -70,30 +70,30 @@ func TestDirectory_IsSubPath(t *testing.T) {
 }
 
 func TestDirectory_IsSubPath_WhenPathIsParent(t *testing.T) {
-	dir := Directory{name: "dir1", path: "/tmp"}
-	if dir.IsSubPath("/tmp") {
+	dir := Directory{name: "dir1", path: filepath.Join(osRoot(), "tmp")}
+	if dir.IsSubPath(filepath.Join(osRoot(), "tmp")) {
 		t.Fatalf("'/tmp' is not a subdirectory of '/tmp/dir1' but was found to be")
 	}
 }
 
 func TestDirectory_IsSubPath_WhenPathIsSibling(t *testing.T) {
-	parent := Directory{name: "dir1", path: "/tmp"}
-	dir, err := parent.AddDirectory("/tmp/dir1/subdir1")
+	parent := Directory{name: "dir1", path: filepath.Join(osRoot(), "tmp")}
+	dir, err := parent.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "subdir1"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = parent.AddDirectory("/tmp/dir1/subdir2")
+	_, err = parent.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "subdir2"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if dir.IsSubPath("/tmp/dir1/subdir2") {
+	if dir.IsSubPath(filepath.Join(osRoot(), "tmp", "dir1", "subdir2")) {
 		t.Fatalf("'/tmp/dir1/subdir2' is not a subdirectory of '/tmp/dir1/subdir1' but was found to be")
 	}
 }
 
 func TestDirectory_IsSubPath_WhenPathIsUnrelated(t *testing.T) {
-	dir := Directory{name: "dir1", path: "/tmp/dir1"}
-	if dir.IsSubPath("/other") {
+	dir := Directory{name: "dir1", path: filepath.Join(osRoot(), "tmp", "dir1")}
+	if dir.IsSubPath(filepath.Join(osRoot(), "other")) {
 		t.Fatalf("'/tmp' is not a subdirectory of '/tmp/dir1' but was found to be")
 	}
 }

@@ -74,15 +74,13 @@ func (dir Directory) StructureEquals(other *Directory) bool {
 // to be a descendant. It returns true or false accordingly.
 func (dir *Directory) IsSubPath(fullPath string) bool {
 	fullPath = filepath.Clean(fullPath)
-	currentDir := filepath.Join(dir.Path(), dir.Name())
-	relPath := strings.TrimPrefix(fullPath, currentDir)
+	relPath := strings.TrimPrefix(fullPath, dir.FullPath())
 	return relPath != fullPath
 }
 
 func (dir *Directory) relativePath(fullPath string) string {
-	currentDir := filepath.Join(dir.Path(), dir.Name())
-	path := strings.TrimPrefix(fullPath, currentDir)
-	path = strings.TrimPrefix(path, "/")
+	path := strings.TrimPrefix(fullPath, dir.FullPath())
+	path = strings.TrimPrefix(path, string(os.PathSeparator))
 	return path
 }
 
