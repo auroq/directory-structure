@@ -259,7 +259,7 @@ var fullPathTests = []struct {
 			if runtime.GOOS == "windows" {
 				return "\\\\tmp\\dir\\item"
 			}
-			return "/tmp/dir"
+			return "/tmp/dir/item"
 		}(),
 	},
 }
