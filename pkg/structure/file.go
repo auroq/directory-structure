@@ -97,3 +97,21 @@ func (dir Directory) FindFileDepth(fileName string) *File {
 	}
 	return nil
 }
+
+// FindFileBreadth searches the directory tree for a File using breadth first search.
+// When it finds a File with name fileName, it returns it.
+// If the File is not found, nil is returned
+func (dir Directory) FindFileBreadth(fileName string) *File {
+	queue := []*Directory{&dir}
+	for len(queue) > 0 {
+		pop := queue[0]
+		queue = queue[1:]
+		if file := pop.File(fileName); file != nil {
+			return file
+		}
+		for _, subDir := range pop.subDirectories {
+			queue = append(queue, subDir)
+		}
+	}
+	return nil
+}

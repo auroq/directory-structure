@@ -218,3 +218,24 @@ func TestDirectory_FindDirectoryDepth(t *testing.T) {
 		})
 	}
 }
+
+func TestDirectory_FindDirectoryBreadth(t *testing.T) {
+	for _, tt := range FindTests {
+		t.Run(tt.name, func(t *testing.T) {
+			expectedPath, expectedName := filepath.Split(tt.fullDirPathToFind)
+			expectedPath = filepath.Clean(expectedPath)
+			found := tt.dir.FindDirectoryBreadth(expectedName)
+			if found == nil {
+				t.Fatal("nil was returned but actual directory was expected")
+			}
+			if found.Path() != expectedPath {
+				t.Fatalf("found path did not match expected. expected path: "+
+					"'%s' actual path: '%s'", expectedPath, found.Path())
+			}
+			if found.Name() != expectedName {
+				t.Fatalf("found name did not match expected. expected name: "+
+					"'%s' actual name: '%s'", expectedName, found.Name())
+			}
+		})
+	}
+}

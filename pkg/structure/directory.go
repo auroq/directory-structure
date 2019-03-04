@@ -126,3 +126,21 @@ func (dir Directory) FindDirectoryDepth(dirName string) *Directory {
 	}
 	return nil
 }
+
+// FindDirectoryBreadth searches the directory tree for a Directory using breadth first search.
+// When it finds a Directory with name dirName, it returns it.
+// If the Directory is not found, nil is returned
+func (dir Directory) FindDirectoryBreadth(dirName string) *Directory {
+	queue := []*Directory{&dir}
+	for len(queue) > 0 {
+		pop := queue[0]
+		queue = queue[1:]
+		if pop.name == dirName {
+			return pop
+		}
+		for _, subDir := range pop.subDirectories {
+			queue = append(queue, subDir)
+		}
+	}
+	return nil
+}
