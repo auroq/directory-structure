@@ -73,7 +73,7 @@ func TestFile_Equals_TrueWithDifferentInstances(t *testing.T) {
 }
 
 func TestFile_Equals_TrueWhenPathStringNotClean(t *testing.T) {
-	file1 := NewFile("file1", filepath.Join(osRoot(), "tmp") + string(os.PathSeparator))
+	file1 := NewFile("file1", filepath.Join(osRoot(), "tmp")+string(os.PathSeparator))
 	file2 := NewFile("file1", filepath.Join(osRoot(), "tmp"))
 	if !file1.Equals(&file2) {
 		t.Fatal("files were equal but were not found to be")

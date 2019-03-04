@@ -76,7 +76,7 @@ func TestDirectory_Equals_TrueWithDifferentInstances(t *testing.T) {
 }
 
 func TestDirectory_Equals_TrueWhenPathStringNotClean(t *testing.T) {
-	directory1 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp") + string(os.PathSeparator))
+	directory1 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp")+string(os.PathSeparator))
 	directory2 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 	if !directory1.Equals(&directory2) {
 		t.Fatal("directories were equal but were not found to be")

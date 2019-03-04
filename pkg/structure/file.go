@@ -52,9 +52,12 @@ func (dir *Directory) AddFile(fullPath string) (*File, error) {
 		parent = dir
 	} else {
 		pathSlice := strings.Split(relativePath, string(os.PathSeparator))
-		newParent, err := dir.createPath(pathSlice)
+		newParent, err := dir.findPath(pathSlice)
 		if err != nil {
-			return nil, err
+			newParent, err = dir.createPath(pathSlice)
+			if err != nil {
+				return nil, err
+			}
 		}
 		parent = newParent
 	}
