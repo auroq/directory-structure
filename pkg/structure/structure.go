@@ -8,59 +8,6 @@ import (
 	"strings"
 )
 
-type Descendants struct {
-	directories []*Directory
-	files       []*File
-}
-
-func (desc Descendants) Contains(item interface{}) bool {
-	switch t := item.(type) {
-	case *File:
-		for _, file := range desc.files {
-			if file.Equals(t) {
-				return true
-			}
-		}
-	case File:
-		for _, file := range desc.files {
-			if file.Equals(&t) {
-				return true
-			}
-		}
-	case *Directory:
-		for _, dir := range desc.directories {
-			if dir.Equals(t) {
-				return true
-			}
-		}
-	case Directory:
-		for _, dir := range desc.directories {
-			if dir.Equals(&t) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func (dir Directory) GetAllDescendants() Descendants {
-	descDirs, descFiles := dir.getDescendants()
-	return Descendants{directories: descDirs, files: descFiles}
-}
-
-func (dir Directory) getDescendants() (dirs []*Directory, files []*File) {
-	for _, file := range dir.files {
-		files = append(files, file)
-	}
-	for _, subdir := range dir.subDirectories {
-		dirs = append(dirs, subdir)
-		descDirs, descFiles := subdir.getDescendants()
-		dirs = append(dirs, descDirs...)
-		files = append(files, descFiles...)
-	}
-	return
-}
-
 // GetDirectoryStructure walks through a directory on disk and its descendants
 // and builds a Directory tree containing that matches the filesystem on disk
 // It returns the root Directory whose path is fullPath and an error if one occurs
