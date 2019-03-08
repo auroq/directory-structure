@@ -78,12 +78,9 @@ func (dir *Directory) AddDirectory(fullPath string) (*Directory, error) {
 		parent = dir
 	} else {
 		pathSlice := strings.Split(relativePath, string(os.PathSeparator))
-		newParent, err := dir.findPath(pathSlice)
+		newParent, err := dir.createPath(pathSlice)
 		if err != nil {
-			newParent, err = dir.createPath(pathSlice)
-			if err != nil {
-				return nil, err
-			}
+			return nil, err
 		}
 		parent = newParent
 	}

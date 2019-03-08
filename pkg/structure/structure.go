@@ -91,11 +91,17 @@ func (dir *Directory) createPath(pathSlice []string) (*Directory, error) {
 	if dir.subDirectories == nil {
 		dir.subDirectories = map[string]*Directory{}
 	}
+	var directory *Directory
 	name := pathSlice[0]
-	path := filepath.Join(dir.Path(), dir.Name())
-	newDirectory := Directory{name: pathSlice[0], path: path}
-	dir.subDirectories[name] = &newDirectory
-	return newDirectory.createPath(pathSlice[1:])
+	if existingDir := dir.SubDirectory(name); existingDir != nil {
+		directory = existingDir
+	} else {
+		path := filepath.Join(dir.Path(), dir.Name())
+		newDirectory := NewDirectory(name, path)
+		directory = &newDirectory
+		dir.subDirectories[name] = directory
+	}
+	return directory.createPath(pathSlice[1:])
 }
 
 func (dir Directory) findPath(relativePath []string) (*Directory, error) {

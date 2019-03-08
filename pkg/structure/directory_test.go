@@ -161,6 +161,43 @@ func TestDirectory_AddDirectory_CreatesSubdirectoriesAsNecessary(t *testing.T) {
 	}
 }
 
+func TestDirectory_AddDirectory_AddingSiblingAsParentOfNewDirectoryDoesntDeleteCurrentDirectories(t *testing.T) {
+	dir := NewDirectory("dir", filepath.Join(osRoot(), "tmp"))
+	_, err := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir", "subdir1", "subsub1"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir", "subdir1", "subsub2", "subsubsub1"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	subsub1, err := dir.GetDirectory(filepath.Join(osRoot(), "tmp", "dir", "subdir1", "subsub1"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if subsub1 == nil {
+		t.Fatal("subsub1 was deleted but should not have been")
+	}
+}
+
+func TestDirectory_AddDirectory_LeafDoesNotContainChildren(t *testing.T) {
+	dir := NewDirectory("dir", filepath.Join(osRoot(), "tmp"))
+	_, err := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir", "subdir1", "subdir2", "subdir3"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if subdir3, ok := dir.SubDirectories()["subdir1"].SubDirectories()["subdir2"].SubDirectories()["subdir3"]; ok {
+		if subdir3.SubDirectories() != nil {
+			t.Fatal("subdir3 contained unexpected children")
+		}
+		if subdir3.Files() != nil {
+			t.Fatal("subdir3 contained unexpected children")
+		}
+	} else {
+		t.Fatal("subdir3 did not exist")
+	}
+}
+
 func TestDirectory_AddDirectory_ReturnsErrorIfNotSubdirectory(t *testing.T) {
 	dir := NewDirectory("dir", filepath.Join(osRoot(), "tmp"))
 	_, err := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "other", "subdir1", "subdir2", "subdir3"))
