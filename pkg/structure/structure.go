@@ -14,7 +14,7 @@ import (
 func GetDirectoryStructure(fullPath string) (*Directory, error) {
 	d, err := os.Stat(fullPath)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("fullPath '%s' does not exist", fullPath))
+		return nil, os.ErrNotExist
 	}
 	if !d.IsDir() {
 		return nil, errors.New(fmt.Sprintf("fullPath '%s' is not a directory", fullPath))
