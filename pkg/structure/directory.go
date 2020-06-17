@@ -56,7 +56,10 @@ func (dir Directory) Equals(other *Directory) bool {
 // Name is the name of of the Directory itself.
 // Path is the path to the Directory not including name
 func NewDirectory(name string, path string) Directory {
-	return Directory{name: name, path: path}
+	if path == "" {
+		path = "/"
+	}
+	return Directory{name: name, path: filepath.Clean(path)}
 }
 
 // AddDirectory creates a new Directory and adds it to the current Directory tree

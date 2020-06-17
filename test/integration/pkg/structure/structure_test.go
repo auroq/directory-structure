@@ -183,7 +183,7 @@ func TestGetDirectoryStructure_WhenFullPathDoesNotExist(t *testing.T) {
 	if err == nil {
 		t.Fatal("an error was expected but err was nil")
 	}
-	if expected := fmt.Sprintf("fullPath '%s' does not exist", path); err.Error() != expected {
-		t.Fatalf("error message was incorrect. expected: '%s' actual: '%s'", expected, err.Error())
+	if !os.IsNotExist(err) {
+		t.Fatalf("error was incorrect. expected: os.NotExists actual: '%s'", err.Error())
 	}
 }

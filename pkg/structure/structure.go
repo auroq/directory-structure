@@ -21,20 +21,22 @@ func GetDirectoryStructure(fullPath string) (*Directory, error) {
 	}
 	rootPath, rootName := filepath.Split(fullPath)
 	rootPath = filepath.Clean(rootPath)
-	root := Directory{name: rootName, path: rootPath}
+	root := NewDirectory(rootName, rootPath)
 	err = filepath.Walk(fullPath,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
-			newFullPath := filepath.Join(path, info.Name())
+			if path == root.FullPath() {
+				return nil
+			}
 			if info.IsDir() {
-				_, err = root.AddDirectory(newFullPath)
+				_, err = root.AddDirectory(path)
 				if err != nil {
 					return err
 				}
 			} else {
-				_, err = root.AddFile(newFullPath)
+				_, err = root.AddFile(path)
 				if err != nil {
 					return err
 				}
