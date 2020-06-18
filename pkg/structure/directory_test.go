@@ -3,6 +3,7 @@ package structure
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -272,6 +273,56 @@ func TestDirectory_FindDirectoryBreadth(t *testing.T) {
 			if found.Name() != expectedName {
 				t.Fatalf("found name did not match expected. expected name: "+
 					"'%s' actual name: '%s'", expectedName, found.Name())
+			}
+		})
+	}
+}
+
+func TestDirectory_MapFnDepth(t *testing.T) {
+	for _, tt := range DirectoryMapTests {
+		fn := func(dir *Directory) error {
+			dir.name = dir.name + "-new"
+			for _, file := range dir.files {
+				ext := filepath.Ext(file.name)
+				file.name = strings.TrimSuffix(file.name, ext) + "-new" + ext
+			}
+
+			return nil
+		}
+
+		t.Run(tt.name, func(t *testing.T) {
+			actual := &tt.dir
+			err := tt.dir.MapFnDepth(fn)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !actual.StructureEquals(&tt.mappedDir)  {
+				t.Fatal("structure of directories did not match")
+			}
+		})
+	}
+}
+
+func TestDirectory_MapFnBreadth(t *testing.T) {
+	for _, tt := range DirectoryMapTests {
+		fn := func(dir *Directory) error {
+			dir.name = dir.name + "-new"
+			for _, file := range dir.files {
+				ext := filepath.Ext(file.name)
+				file.name = strings.TrimSuffix(file.name, ext) + "-new" + ext
+			}
+
+			return nil
+		}
+
+		t.Run(tt.name, func(t *testing.T) {
+			actual := &tt.dir
+			err := tt.dir.MapFnBreadth(fn)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !actual.StructureEquals(&tt.mappedDir)  {
+				t.Fatal("structure of directories did not match")
 			}
 		})
 	}

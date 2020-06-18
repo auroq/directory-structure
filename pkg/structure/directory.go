@@ -147,3 +147,36 @@ func (dir Directory) FindDirectoryBreadth(dirName string) *Directory {
 	}
 	return nil
 }
+
+// MapFnDepth performs a function on every directory in the tree using a depth first approach
+// If any of the functions returns an error, the process is stopped and the error is returned
+func (dir *Directory) MapFnDepth(fn func(directory *Directory) error) error {
+	err := fn(dir)
+	if err != nil {
+		return err
+	}
+	for _, subDir := range dir.SubDirectories() {
+		err := subDir.MapFnDepth(fn)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// MapFnBreadth performs a function on every directory in the tree using a breadth first approach
+// If any of the functions returns an error, the process is stopped and the error is returned
+func (dir *Directory) MapFnBreadth(fn func(directory *Directory) error) error {
+	queue := []*Directory{dir}
+	for len(queue) > 0 {
+		pop := queue[0]
+		queue = queue[1:]
+		if err := fn(pop); err != nil {
+			return err
+		}
+		for _, subDir := range pop.subDirectories {
+			queue = append(queue, subDir)
+		}
+	}
+	return nil
+}
