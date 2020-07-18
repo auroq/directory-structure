@@ -291,13 +291,15 @@ func TestDirectory_MapFnDepth(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			actual := &tt.dir
+			expected := &tt.dir
 			err := tt.dir.MapFnDepth(fn)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if !actual.StructureEquals(&tt.mappedDir)  {
-				t.Fatal("structure of directories did not match")
+			if actual := tt.mappedDir; !actual.StructureEquals(expected)  {
+				_, actualPrinted := actual.Print()
+				_, expectedPrinted := expected.Print()
+				t.Fatalf("structure of directories did not match\nexpected: %s\nactual: %s", expectedPrinted, actualPrinted)
 			}
 		})
 	}
@@ -316,13 +318,31 @@ func TestDirectory_MapFnBreadth(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			actual := &tt.dir
+			expected := &tt.dir
 			err := tt.dir.MapFnBreadth(fn)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if !actual.StructureEquals(&tt.mappedDir)  {
-				t.Fatal("structure of directories did not match")
+			if actual := tt.mappedDir; !actual.StructureEquals(expected)  {
+				_, actualPrinted := actual.Print()
+				_, expectedPrinted := expected.Print()
+				t.Fatalf("structure of directories did not match\nexpected: %s\nactual: %s", expectedPrinted, actualPrinted)
+			}
+		})
+	}
+}
+
+func TestDirectory_Print(t *testing.T) {
+	for _, tt := range DirectoryPrint {
+		t.Run(tt.name, func(t *testing.T) {
+			actual, err := tt.dir.Print()
+			if err != nil {
+				t.Fatal(err)
+			}
+			expected := strings.ReplaceAll(tt.expected, "~", "/")
+			expected = strings.ReplaceAll(expected, "//", "/")
+			if actual != expected {
+				t.Fatalf("printed output did not match.\nexpected: \n%s\nactual: \n%s", expected, actual)
 			}
 		})
 	}

@@ -1,6 +1,7 @@
 package structure
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -296,6 +297,59 @@ var DirectoryMapTests = []struct {
 				},
 			},
 		},
+	},
+}
+
+var DirectoryPrint = []struct {
+	name     string
+	dir      Directory
+	expected string
+}{
+	{"DirectoryWithSubDirectory",
+		func() Directory {
+			dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
+			_, _ = dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
+			_, _ = dir.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1.txt"))
+			return dir
+		}(),
+		fmt.Sprintf(
+`%s~tmp~dir1
+        ~sub1
+        ~sub1.txt`, osRoot()),
+	},
+	{"DirectoryWithSubDirectoryWithSubDirectory",
+		func() Directory {
+			dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
+			sub1, _ := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
+			_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1"))
+			_, _ = sub1.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1.txt"))
+			return dir
+		}(),
+		fmt.Sprintf(
+`%s~tmp~dir1
+        ~sub1
+            ~subsub1
+            ~subsub1.txt`, osRoot()),
+	},
+	{"DirectoryWithSubDirectories",
+		func() Directory {
+			dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
+			sub1, _ := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
+			_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1"))
+			subsub2, _ := sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2"))
+			_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub3"))
+			_, _ = subsub2.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2", "subsubsub"))
+			_, _ = subsub2.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2", "subsubsub.txt"))
+			return dir
+		}(),
+		fmt.Sprintf(
+`%s~tmp~dir1
+        ~sub1
+            ~subsub1
+            ~subsub2
+                ~subsubsub
+                ~subsubsub.txt
+            ~subsub3`, osRoot()),
 	},
 }
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -179,4 +180,37 @@ func (dir *Directory) MapFnBreadth(fn func(directory *Directory) error) error {
 		}
 	}
 	return nil
+}
+
+// Print returns a string containing the directory structure starting from the current directory
+func (dir *Directory) Print() (string, error) {
+	var outputs []string
+	err := dir.MapFnBreadth(func(directory *Directory) error {
+		outputs = append(outputs, directory.FullPath())
+		for _, file := range directory.Files() {
+			outputs = append(outputs, file.FullPath())
+		}
+		sort.Strings(outputs)
+
+		return nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	outputs = append([]string{outputs[0]}, sliceMap(outputs[1:], func(s string) string {
+		spaces := (strings.Count(s, "/") - 1) * 4
+		lastSlashIndex := strings.LastIndex(s, "/")
+		return strings.Repeat(" ", spaces) + s[lastSlashIndex:]
+	})...)
+
+	return strings.Join(outputs, "\n"), nil
+}
+
+func sliceMap(vs []string, f func(string) string) []string {
+	vsm := make([]string, len(vs))
+	for i, v := range vs {
+		vsm[i] = f(v)
+	}
+	return vsm
 }
