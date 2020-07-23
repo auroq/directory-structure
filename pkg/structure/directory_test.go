@@ -279,7 +279,7 @@ func TestDirectory_FindDirectoryBreadth(t *testing.T) {
 }
 
 func TestDirectory_MapFnDepth(t *testing.T) {
-	for _, tt := range DirectoryMapTests {
+	for _, tt := range directoryMapTests() {
 		fn := func(dir *Directory) error {
 			dir.name = dir.name + "-new"
 			for _, file := range dir.files {
@@ -291,14 +291,14 @@ func TestDirectory_MapFnDepth(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			expected := &tt.dir
+			actual := &tt.dir
 			err := tt.dir.MapFnDepth(fn)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if actual := tt.mappedDir; !actual.StructureEquals(expected)  {
-				_, actualPrinted := actual.Print()
-				_, expectedPrinted := expected.Print()
+			if expected := &tt.mappedDir; !actual.StructureEquals(expected)  {
+				actualPrinted, _ := actual.Print()
+				expectedPrinted, _ := expected.Print()
 				t.Fatalf("structure of directories did not match\nexpected: %s\nactual: %s", expectedPrinted, actualPrinted)
 			}
 		})
@@ -306,7 +306,7 @@ func TestDirectory_MapFnDepth(t *testing.T) {
 }
 
 func TestDirectory_MapFnBreadth(t *testing.T) {
-	for _, tt := range DirectoryMapTests {
+	for _, tt := range directoryMapTests() {
 		fn := func(dir *Directory) error {
 			dir.name = dir.name + "-new"
 			for _, file := range dir.files {
@@ -318,14 +318,14 @@ func TestDirectory_MapFnBreadth(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			expected := &tt.dir
+			actual := &tt.dir
 			err := tt.dir.MapFnBreadth(fn)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if actual := tt.mappedDir; !actual.StructureEquals(expected)  {
-				_, actualPrinted := actual.Print()
-				_, expectedPrinted := expected.Print()
+			if expected := &tt.mappedDir; !actual.StructureEquals(expected)  {
+				actualPrinted, _ := actual.Print()
+				expectedPrinted, _ := expected.Print()
 				t.Fatalf("structure of directories did not match\nexpected: %s\nactual: %s", expectedPrinted, actualPrinted)
 			}
 		})

@@ -190,114 +190,118 @@ var FindTests = []struct {
 	},
 }
 
-var DirectoryMapTests = []struct {
+type directoryMapTestsType []struct {
 	name      string
 	dir       Directory
 	mappedDir Directory
-}{
-	{"DirectoryWithSubDirectory",
-		func() Directory {
-			dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
-			_, _ = dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
-			_, _ = dir.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1.txt"))
-			return dir
-		}(),
-		Directory{
-			name: "dir1-new",
-			path: filepath.Join(osRoot(), "tmp"),
-			subDirectories: map[string]*Directory{
-				"sub1": {
-					name: "sub1-new",
-					path: filepath.Join(osRoot(), "tmp", "dir1"),
-				},
-			},
-			files: map[string]*File{
-				"sub1.txt": {
-					name: "sub1-new.txt",
-					path: filepath.Join(osRoot(), "tmp", "dir1"),
-				},
-			},
-		},
-	},
-	{"DirectoryWithSubDirectoryWithSubDirectory",
-		func() Directory {
-			dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
-			sub1, _ := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
-			_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1"))
-			_, _ = sub1.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1.txt"))
-			return dir
-		}(),
-		Directory{
-			name: "dir1-new",
-			path: filepath.Join(osRoot(), "tmp"),
-			subDirectories: map[string]*Directory{
-				"sub1": {
-					name: "sub1-new",
-					path: filepath.Join(osRoot(), "tmp", "dir1"),
-					subDirectories: map[string]*Directory{
-						"subsub1": {
-							name: "subsub1-new",
-							path: filepath.Join(osRoot(), "tmp", "dir1", "sub1"),
-						},
+}
+
+func directoryMapTests() directoryMapTestsType {
+	return directoryMapTestsType{
+		{"DirectoryWithSubDirectory",
+			func() Directory {
+				dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
+				_, _ = dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
+				_, _ = dir.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1.txt"))
+				return dir
+			}(),
+			Directory{
+				name: "dir1-new",
+				path: filepath.Join(osRoot(), "tmp"),
+				subDirectories: map[string]*Directory{
+					"sub1": {
+						name: "sub1-new",
+						path: filepath.Join(osRoot(), "tmp", "dir1"),
 					},
-					files: map[string]*File{
-						"subsub1.txt": {
-							name: "subsub1-new.txt",
-							path: filepath.Join(osRoot(), "tmp", "dir1", "sub1"),
-						},
+				},
+				files: map[string]*File{
+					"sub1.txt": {
+						name: "sub1-new.txt",
+						path: filepath.Join(osRoot(), "tmp", "dir1"),
 					},
 				},
 			},
 		},
-	},
-	{"DirectoryWithSubDirectories",
-		func() Directory {
-			dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
-			sub1, _ := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
-			_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1"))
-			subsub2, _ := sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2"))
-			_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub3"))
-			_, _ = subsub2.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2", "subsubsub"))
-			_, _ = subsub2.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2", "subsubsub.txt"))
-			return dir
-		}(),
-		Directory{
-			name: "dir1-new",
-			path: filepath.Join(osRoot(), "tmp"),
-			subDirectories: map[string]*Directory{
-				"sub1": {
-					name: "sub1-new",
-					path: filepath.Join(osRoot(), "tmp", "dir1"),
-					subDirectories: map[string]*Directory{
-						"subsub1": {
-							name: "subsub1-new",
-							path: filepath.Join(osRoot(), "tmp", "dir1", "sub1"),
-						},
-						"subsub2": {
-							name: "subsub2-new",
-							path: filepath.Join(osRoot(), "tmp", "dir1", "sub1"),
-							subDirectories: map[string]*Directory{
-								"subsubsub": {
-									name: "subsubsub-new",
-									path: filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2"),
-								},
-							},
-							files: map[string]*File{
-								"subsubsub.txt": {
-									name: "subsubsub-new.txt",
-									path: filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2"),
-								},
+		{"DirectoryWithSubDirectoryWithSubDirectory",
+			func() Directory {
+				dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
+				sub1, _ := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
+				_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1"))
+				_, _ = sub1.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1.txt"))
+				return dir
+			}(),
+			Directory{
+				name: "dir1-new",
+				path: filepath.Join(osRoot(), "tmp"),
+				subDirectories: map[string]*Directory{
+					"sub1": {
+						name: "sub1-new",
+						path: filepath.Join(osRoot(), "tmp", "dir1"),
+						subDirectories: map[string]*Directory{
+							"subsub1": {
+								name: "subsub1-new",
+								path: filepath.Join(osRoot(), "tmp", "dir1", "sub1"),
 							},
 						},
-						"subsub3": {
-							name: "subsub3-new",
-							path: filepath.Join(osRoot(), "tmp", "dir1", "sub1"),
+						files: map[string]*File{
+							"subsub1.txt": {
+								name: "subsub1-new.txt",
+								path: filepath.Join(osRoot(), "tmp", "dir1", "sub1"),
+							},
 						},
 					},
 				},
 			},
 		},
-	},
+		{"DirectoryWithSubDirectories",
+			func() Directory {
+				dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
+				sub1, _ := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
+				_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1"))
+				subsub2, _ := sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2"))
+				_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub3"))
+				_, _ = subsub2.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2", "subsubsub"))
+				_, _ = subsub2.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2", "subsubsub.txt"))
+				return dir
+			}(),
+			Directory{
+				name: "dir1-new",
+				path: filepath.Join(osRoot(), "tmp"),
+				subDirectories: map[string]*Directory{
+					"sub1": {
+						name: "sub1-new",
+						path: filepath.Join(osRoot(), "tmp", "dir1"),
+						subDirectories: map[string]*Directory{
+							"subsub1": {
+								name: "subsub1-new",
+								path: filepath.Join(osRoot(), "tmp", "dir1", "sub1"),
+							},
+							"subsub2": {
+								name: "subsub2-new",
+								path: filepath.Join(osRoot(), "tmp", "dir1", "sub1"),
+								subDirectories: map[string]*Directory{
+									"subsubsub": {
+										name: "subsubsub-new",
+										path: filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2"),
+									},
+								},
+								files: map[string]*File{
+									"subsubsub.txt": {
+										name: "subsubsub-new.txt",
+										path: filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2"),
+									},
+								},
+							},
+							"subsub3": {
+								name: "subsub3-new",
+								path: filepath.Join(osRoot(), "tmp", "dir1", "sub1"),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
 }
 
 var DirectoryPrint = []struct {
