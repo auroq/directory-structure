@@ -172,20 +172,23 @@ func TestDirectory_AddFile_CreatesSubdirectoriesAsNecessary(t *testing.T) {
 	}
 	if subdir1, ok := dir.SubDirectories()["subdir1"]; !ok {
 		t.Fatal("subdir1 was not created")
+	} else {
 		expected := NewDirectory("subdir1", filepath.Join(osRoot(), "tmp", "dir"))
-		if !subdir1.Equals(&expected) {
+		if !subdir1.Equals(expected) {
 			t.Fatal("subdir1 structure was incorrect")
 		}
 	}
 	if subdir2, ok := dir.SubDirectories()["subdir1"].SubDirectories()["subdir2"]; !ok {
 		t.Fatal("subdir2 was not created")
+	} else {
 		expected := NewDirectory("subdir2", filepath.Join(osRoot(), "tmp", "dir", "subdir1"))
-		if !subdir2.Equals(&expected) {
+		if !subdir2.Equals(expected) {
 			t.Fatal("subdir2 structure was incorrect")
 		}
 	}
 	if file, ok := dir.SubDirectories()["subdir1"].SubDirectories()["subdir2"].Files()["file"]; !ok {
 		t.Fatal("file was not created")
+	} else {
 		expected := NewFile("file", filepath.Join(osRoot(), "tmp", "dir", "subdir1", "subdir2"))
 		if !file.Equals(&expected) {
 			t.Fatal("file structure was incorrect")

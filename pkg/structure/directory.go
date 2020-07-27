@@ -56,11 +56,11 @@ func (dir Directory) Equals(other *Directory) bool {
 // NewDirectory creates a new Directory using a name and a path.
 // Name is the name of of the Directory itself.
 // Path is the path to the Directory not including name
-func NewDirectory(name string, path string) Directory {
+func NewDirectory(name string, path string) *Directory {
 	if path == "" {
 		path = "/"
 	}
-	return Directory{name: name, path: filepath.Clean(path)}
+	return &Directory{name: name, path: filepath.Clean(path)}
 }
 
 // AddDirectory creates a new Directory and adds it to the current Directory tree
@@ -91,8 +91,8 @@ func (dir *Directory) AddDirectory(fullPath string) (*Directory, error) {
 	if parent.subDirectories == nil {
 		parent.subDirectories = map[string]*Directory{}
 	}
-	parent.subDirectories[name] = &newDirectory
-	return &newDirectory, nil
+	parent.subDirectories[name] = newDirectory
+	return newDirectory, nil
 }
 
 // GetDirectory transverses the current Directory to find a directory whose

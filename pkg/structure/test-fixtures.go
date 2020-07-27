@@ -149,12 +149,12 @@ var DirectoryIdentities = []struct {
 
 var FindTests = []struct {
 	name               string
-	dir                Directory
+	dir                *Directory
 	fullDirPathToFind  string
 	fullFilePathToFind string
 }{
 	{"DirectoryWithSubDirectory",
-		func() Directory {
+		func() *Directory {
 			dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 			_, _ = dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
 			_, _ = dir.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1.txt"))
@@ -164,7 +164,7 @@ var FindTests = []struct {
 		filepath.Join(osRoot(), "tmp", "dir1", "sub1.txt"),
 	},
 	{"DirectoryWithSubDirectoryWithSubDirectory",
-		func() Directory {
+		func() *Directory {
 			dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 			sub1, _ := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
 			_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1"))
@@ -175,7 +175,7 @@ var FindTests = []struct {
 		filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1.txt"),
 	},
 	{"DirectoryWithSubDirectories",
-		func() Directory {
+		func() *Directory {
 			dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 			sub1, _ := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
 			_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1"))
@@ -203,7 +203,7 @@ func directoryMapTests() directoryMapTestsType {
 				dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 				_, _ = dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
 				_, _ = dir.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1.txt"))
-				return dir
+				return *dir
 			}(),
 			Directory{
 				name: "dir1-new",
@@ -228,7 +228,7 @@ func directoryMapTests() directoryMapTestsType {
 				sub1, _ := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
 				_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1"))
 				_, _ = sub1.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1.txt"))
-				return dir
+				return *dir
 			}(),
 			Directory{
 				name: "dir1-new",
@@ -262,7 +262,7 @@ func directoryMapTests() directoryMapTestsType {
 				_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub3"))
 				_, _ = subsub2.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2", "subsubsub"))
 				_, _ = subsub2.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2", "subsubsub.txt"))
-				return dir
+				return *dir
 			}(),
 			Directory{
 				name: "dir1-new",
@@ -314,7 +314,7 @@ var DirectoryPrint = []struct {
 			dir := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 			_, _ = dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
 			_, _ = dir.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1.txt"))
-			return dir
+			return *dir
 		}(),
 		fmt.Sprintf(
 `%s~tmp~dir1
@@ -327,7 +327,7 @@ var DirectoryPrint = []struct {
 			sub1, _ := dir.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1"))
 			_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1"))
 			_, _ = sub1.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub1.txt"))
-			return dir
+			return *dir
 		}(),
 		fmt.Sprintf(
 `%s~tmp~dir1
@@ -344,7 +344,7 @@ var DirectoryPrint = []struct {
 			_, _ = sub1.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub3"))
 			_, _ = subsub2.AddDirectory(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2", "subsubsub"))
 			_, _ = subsub2.AddFile(filepath.Join(osRoot(), "tmp", "dir1", "sub1", "subsub2", "subsubsub.txt"))
-			return dir
+			return *dir
 		}(),
 		fmt.Sprintf(
 `%s~tmp~dir1

@@ -13,10 +13,10 @@ func TestDescendants_ContainsDirectory_TrueWhenContainsDirectory(t *testing.T) {
 	file2 := NewFile("file2", osRoot())
 	file3 := NewFile("file1", filepath.Join(osRoot(), "dir1"))
 	desc := Descendants{
-		[]*Directory{&dir1, &dir2, &subdir1},
+		[]*Directory{dir1, dir2, subdir1},
 		[]*File{&file1, &file2, &file3},
 	}
-	if !desc.ContainsDirectory(&dir2) {
+	if !desc.ContainsDirectory(dir2) {
 		t.Fatal("directory was not found in descendants")
 	}
 }
@@ -29,10 +29,10 @@ func TestDescendants_ContainsDirectory_FalseWhenNotContainsDirectory(t *testing.
 	file2 := NewFile("file2", osRoot())
 	file3 := NewFile("file1", filepath.Join(osRoot(), "dir1"))
 	desc := Descendants{
-		[]*Directory{&dir1, &subdir1},
+		[]*Directory{dir1, subdir1},
 		[]*File{&file1, &file2, &file3},
 	}
-	if desc.ContainsDirectory(&dir2) {
+	if desc.ContainsDirectory(dir2) {
 		t.Fatal("directory was found in descendants but should not have been")
 	}
 }
@@ -45,7 +45,7 @@ func TestDescendants_ContainsFile_TrueWhenContainsFile(t *testing.T) {
 	file2 := NewFile("file2", osRoot())
 	file3 := NewFile("file1", filepath.Join(osRoot(), "dir1"))
 	desc := Descendants{
-		[]*Directory{&dir1, &dir2, &subdir1},
+		[]*Directory{dir1, dir2, subdir1},
 		[]*File{&file1, &file2, &file3},
 	}
 	if !desc.ContainsFile(&file2) {
@@ -61,7 +61,7 @@ func TestDescendants_ContainsFile_FalseWhenNotContainsFile(t *testing.T) {
 	file2 := NewFile("file2", osRoot())
 	file3 := NewFile("file1", filepath.Join(osRoot(), "dir1"))
 	desc := Descendants{
-		[]*Directory{&dir1, &dir2, &subdir1},
+		[]*Directory{dir1, dir2, subdir1},
 		[]*File{&file1, &file3},
 	}
 	if desc.ContainsFile(&file2) {

@@ -19,7 +19,7 @@ func TestDirectory_StructureEquals_WithIdentity(t *testing.T) {
 func TestDirectory_StructureEquals_WithIdentityAndFile(t *testing.T) {
 	for _, tt := range FindTests {
 		t.Run(tt.name, func(t *testing.T) {
-			if !tt.dir.StructureEquals(&tt.dir) {
+			if !tt.dir.StructureEquals(tt.dir) {
 				t.Fatal("directory structures were found to be unequal but were equal")
 			}
 		})

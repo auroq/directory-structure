@@ -11,7 +11,7 @@ import (
 // GetDirectoryStructure walks through a directory on disk and its descendants
 // and builds a Directory tree containing that matches the filesystem on disk
 // It returns the root Directory whose path is fullPath and an error if one occurs
-func GetDirectoryStructure(fullPath string) (*Directory, error) {
+func GetDirectoryStructure(fullPath string, relative bool) (*Directory, error) {
 	d, err := os.Stat(fullPath)
 	if err != nil {
 		return nil, os.ErrNotExist
@@ -21,7 +21,12 @@ func GetDirectoryStructure(fullPath string) (*Directory, error) {
 	}
 	rootPath, rootName := filepath.Split(fullPath)
 	rootPath = filepath.Clean(rootPath)
-	root := NewDirectory(rootName, rootPath)
+	var root *Directory
+	if relative {
+		root = NewDirectory(rootName, "")
+	} else {
+		root = NewDirectory(rootName, rootPath)
+	}
 	err = filepath.Walk(fullPath,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -30,20 +35,31 @@ func GetDirectoryStructure(fullPath string) (*Directory, error) {
 			if path == root.FullPath() {
 				return nil
 			}
+			var addFunction func(p string) (interface{}, error)
+			var addPath string
 			if info.IsDir() {
-				_, err = root.AddDirectory(path)
-				if err != nil {
-					return err
+				if relative {
+					addFunction = func(p string) (interface{}, error) { return root.AddDirectory(p) }
+					addPath = strings.TrimPrefix(path, rootPath)
+				} else {
+					addFunction = func(p string) (interface{}, error) { return root.AddDirectory(p) }
+					addPath = path
 				}
 			} else {
-				_, err = root.AddFile(path)
-				if err != nil {
-					return err
+				if relative {
+					addFunction = func(p string) (interface{}, error) { return root.AddFile(p) }
+					addPath = strings.TrimPrefix(path, rootPath)
+				} else {
+					addFunction = func(p string) (interface{}, error) { return root.AddFile(p) }
+					addPath = path
 				}
+			}
+			if _, err := addFunction(addPath); err != nil {
+				return err
 			}
 			return nil
 		})
-	return &root, err
+	return root, err
 }
 
 // StructureEquals determines if other and its descendants are identical
@@ -76,7 +92,8 @@ func (dir Directory) StructureEquals(other *Directory) bool {
 // to be a descendant. It returns true or false accordingly.
 func (dir *Directory) IsSubPath(fullPath string) bool {
 	fullPath = filepath.Clean(fullPath)
-	relPath := strings.TrimPrefix(fullPath, dir.FullPath())
+	fullPath = strings.TrimPrefix(fullPath, "/")
+	relPath := strings.TrimPrefix(fullPath, strings.TrimPrefix(dir.FullPath(), "/"))
 	return relPath != fullPath
 }
 
@@ -100,7 +117,7 @@ func (dir *Directory) createPath(pathSlice []string) (*Directory, error) {
 	} else {
 		path := filepath.Join(dir.Path(), dir.Name())
 		newDirectory := NewDirectory(name, path)
-		directory = &newDirectory
+		directory = newDirectory
 		dir.subDirectories[name] = directory
 	}
 	return directory.createPath(pathSlice[1:])

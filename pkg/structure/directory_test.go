@@ -71,7 +71,7 @@ func TestDirectory_Equals_TrueWithIdentity(t *testing.T) {
 func TestDirectory_Equals_TrueWithDifferentInstances(t *testing.T) {
 	directory1 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 	directory2 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
-	if !directory1.Equals(&directory2) {
+	if !directory1.Equals(directory2) {
 		t.Fatal("directories were found to be equal but were not")
 	}
 }
@@ -79,7 +79,7 @@ func TestDirectory_Equals_TrueWithDifferentInstances(t *testing.T) {
 func TestDirectory_Equals_TrueWhenPathStringNotClean(t *testing.T) {
 	directory1 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp")+string(os.PathSeparator))
 	directory2 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
-	if !directory1.Equals(&directory2) {
+	if !directory1.Equals(directory2) {
 		t.Fatal("directories were equal but were not found to be")
 	}
 }
@@ -87,7 +87,7 @@ func TestDirectory_Equals_TrueWhenPathStringNotClean(t *testing.T) {
 func TestDirectory_Equals_FalseWhenPathStringNotSameCase(t *testing.T) {
 	directory1 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 	directory2 := NewDirectory("dir1", filepath.Join(osRoot(), "tMp"))
-	if directory1.Equals(&directory2) {
+	if directory1.Equals(directory2) {
 		t.Fatal("directories were found to be equal but were not")
 	}
 }
@@ -95,7 +95,7 @@ func TestDirectory_Equals_FalseWhenPathStringNotSameCase(t *testing.T) {
 func TestDirectory_Equals_FalseWhenDifferentName(t *testing.T) {
 	directory1 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 	directory2 := NewDirectory("dir2", filepath.Join(osRoot(), "tmp"))
-	if directory1.Equals(&directory2) {
+	if directory1.Equals(directory2) {
 		t.Fatal("directories were found to be equal but were not")
 	}
 }
@@ -103,7 +103,7 @@ func TestDirectory_Equals_FalseWhenDifferentName(t *testing.T) {
 func TestDirectory_Equals_FalseWhenDifferentPath(t *testing.T) {
 	directory1 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp"))
 	directory2 := NewDirectory("dir1", filepath.Join(osRoot(), "tmp", "dir"))
-	if directory1.Equals(&directory2) {
+	if directory1.Equals(directory2) {
 		t.Fatal("directories were found to be equal but were not")
 	}
 }

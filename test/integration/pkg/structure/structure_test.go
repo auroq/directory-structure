@@ -77,11 +77,11 @@ func TestGetDirectoryStructure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	actual, err := structure.GetDirectoryStructure(tmpDir)
+	actual, err := structure.GetDirectoryStructure(tmpDir, false)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !actual.Equals(&expected) {
+	if !actual.Equals(expected) {
 		t.Fatal("directory structures did not match")
 	}
 }
@@ -144,11 +144,88 @@ func TestGetDirectoryStructureMatchesRawDirectory(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	actual, err := structure.GetDirectoryStructure(tmpDir)
+	actual, err := structure.GetDirectoryStructure(tmpDir, false)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !actual.StructureEquals(&expected) {
+	if !actual.StructureEquals(expected) {
+		t.Fatal("directory structures did not match")
+	}
+}
+
+func TestGetDirectoryStructureRelative(t *testing.T) {
+	tmpDir, err := ioutil.TempDir("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, name := filepath.Split(tmpDir)
+	expected := structure.NewDirectory(name, "")
+	_, err = expected.AddDirectory(filepath.Join(name, "dir1"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir2, err := expected.AddDirectory(filepath.Join(name, "dir2"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = expected.AddDirectory(filepath.Join(name, "dir3"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = dir2.AddDirectory(filepath.Join(name, "dir2", "sub1"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sub2, err := dir2.AddDirectory(filepath.Join(name, "dir2", "sub2"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = dir2.AddDirectory(filepath.Join(name, "dir2", "sub3"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = sub2.AddFile(filepath.Join(name, "dir2", "sub2", "file"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = os.Mkdir(filepath.Join(tmpDir, "dir1"), 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Mkdir(filepath.Join(tmpDir, "dir2"), 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Mkdir(filepath.Join(tmpDir, "dir3"), 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Mkdir(filepath.Join(tmpDir, "dir2", "sub1"), 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Mkdir(filepath.Join(tmpDir, "dir2", "sub2"), 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Mkdir(filepath.Join(tmpDir, "dir2", "sub3"), 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = os.OpenFile(filepath.Join(tmpDir, "dir2", "sub2", "file"), os.O_RDONLY|os.O_CREATE, 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, err := structure.GetDirectoryStructure(tmpDir, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !actual.Equals(expected) {
 		t.Fatal("directory structures did not match")
 	}
 }
@@ -163,7 +240,7 @@ func TestGetDirectoryStructure_WhenFullPathIsNotADirectory(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = structure.GetDirectoryStructure(file.Name())
+	_, err = structure.GetDirectoryStructure(file.Name(), false)
 	if err == nil {
 		t.Fatal("an error was expected but err was nil")
 	}
@@ -179,7 +256,7 @@ func TestGetDirectoryStructure_WhenFullPathDoesNotExist(t *testing.T) {
 	}
 
 	path := filepath.Join(tmpDir, "missingDir")
-	_, err = structure.GetDirectoryStructure(path)
+	_, err = structure.GetDirectoryStructure(path, false)
 	if err == nil {
 		t.Fatal("an error was expected but err was nil")
 	}
